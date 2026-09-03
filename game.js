@@ -50,8 +50,14 @@
     curious: { name: "Meraklı", desc: "Telefonu açtın." },
   };
   let save = loadSave();
+
+  /* ---------- çeviri (i18n) ---------- */
+  const I18N = window.YAYIN_I18N || { lang: "tr", t: (s) => s };
+  I18N.lang = save.lang || "tr";
+  const T = (s) => I18N.t(s);
+
   function loadSave() {
-    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal",
+    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal", lang: "tr",
       stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, checkpoint: null };
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -278,7 +284,7 @@
   function playVO(file, subtitle, entity) {
     stopVO();
     if (subtitle) {
-      subBar.textContent = subtitle;
+      subBar.textContent = T(subtitle);
       subBar.classList.toggle("entity", !!entity);
       subBar.classList.add("show");
     }
@@ -308,7 +314,9 @@
 
   /* ---------- OSD ---------- */
   let tapeSecs = 0;
-  const months = ["OCA", "ŞUB", "MAR", "NİS", "MAY", "HAZ", "TEM", "AĞU", "EYL", "EKİ", "KAS", "ARA"];
+  const months = I18N.lang === "en"
+    ? ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+    : ["OCA", "ŞUB", "MAR", "NİS", "MAY", "HAZ", "TEM", "AĞU", "EYL", "EKİ", "KAS", "ARA"];
   osdDate.textContent = "13 " + months[Math.floor(Math.random() * 12)] + " 1998";
   setInterval(() => {
     tapeSecs++;
@@ -389,7 +397,7 @@
   }
   function flashDiscovery(label, x, y) {
     const t = document.createElement("div");
-    t.textContent = label;
+    t.textContent = T(label);
     t.style.cssText = `position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);z-index:11;color:var(--amber);font-size:22px;text-shadow:0 0 12px var(--amber),0 2px 6px #000;pointer-events:none;transition:all 1.4s;letter-spacing:1px;`;
     crt.appendChild(t);
     requestAnimationFrame(() => { t.style.top = (y - 6) + "%"; t.style.opacity = "0"; });
@@ -403,16 +411,16 @@
     const s = Math.max(0, state.sanity);
     const maxS = (DIFF[save.difficulty] || DIFF.normal).sanity;
     const hearts = "◆".repeat(s) + `<span class="empty">${"◇".repeat(Math.max(0, maxS - s))}</span>`;
-    const items = state.inv.length ? state.inv.map((i) => ITEM_NAMES[i] || i).join(" · ") : "<span class='empty'>boş</span>";
+    const items = state.inv.length ? state.inv.map((i) => T(ITEM_NAMES[i] || i)).join(" · ") : `<span class='empty'>${T("boş")}</span>`;
     hud.innerHTML =
-      `<div><span class="lbl">AKIL SAĞLIĞI</span><br>${hearts}</div>` +
-      `<div style="margin-top:6px"><span class="lbl">ÇANTA</span><br><span class="inv">${items}</span></div>`;
+      `<div><span class="lbl">${T("AKIL SAĞLIĞI")}</span><br>${hearts}</div>` +
+      `<div style="margin-top:6px"><span class="lbl">${T("ÇANTA")}</span><br><span class="inv">${items}</span></div>`;
     crt.classList.toggle("lowsanity", state.sanity <= 1);
   }
   function flashItem(item) {
     sfx.pickup();
     const t = document.createElement("div");
-    t.textContent = "+ " + (ITEM_NAMES[item] || item);
+    t.textContent = "+ " + T(ITEM_NAMES[item] || item);
     t.style.cssText = "position:absolute;left:50%;top:20%;transform:translateX(-50%);z-index:11;color:var(--amber);font-size:26px;text-shadow:0 0 10px var(--amber);pointer-events:none;transition:all 1.2s;letter-spacing:1px;";
     crt.appendChild(t);
     requestAnimationFrame(() => { t.style.top = "13%"; t.style.opacity = "0"; });
@@ -432,7 +440,7 @@
     const ach = toastQueue.shift();
     const el = document.createElement("div");
     el.className = "ach-toast";
-    el.innerHTML = `<div class="ach-ic">🏆</div><div><div class="ach-h">BAŞARIM AÇILDI</div><div class="ach-n">${ach.name}</div><div class="ach-d">${ach.desc}</div></div>`;
+    el.innerHTML = `<div class="ach-ic">🏆</div><div><div class="ach-h">${T("BAŞARIM AÇILDI")}</div><div class="ach-n">${T(ach.name)}</div><div class="ach-d">${T(ach.desc)}</div></div>`;
     crt.appendChild(el);
     sfx.pickup(); setTimeout(() => tone(1046, 0.2, "triangle", 0.07), 120);
     requestAnimationFrame(() => el.classList.add("show"));
@@ -465,13 +473,13 @@
     const cls = node.cls ? " " + node.cls : "";
     screen.innerHTML = `
       <div class="frame${cls}">
-        ${node.title ? `<h1 class="title">${node.title}</h1>` : ""}
-        ${node.subtitle ? `<div class="subtitle">${node.subtitle}</div>` : ""}
+        ${node.title ? `<h1 class="title">${T(node.title)}</h1>` : ""}
+        ${node.subtitle ? `<div class="subtitle">${T(node.subtitle)}</div>` : ""}
         ${node.gallery ? galleryHTML() : ""}
         <p class="story"></p>
-        ${node.prompt ? `<div class="prompt">${node.prompt}</div>` : ""}
+        ${node.prompt ? `<div class="prompt">${T(node.prompt)}</div>` : ""}
         <div class="choices"></div>
-        ${node.hint ? `<div class="hint">${node.hint}</div>` : ""}
+        ${node.hint ? `<div class="hint">${T(node.hint)}</div>` : ""}
       </div>`;
 
     const storyEl = screen.querySelector(".story");
@@ -484,7 +492,7 @@
         const b = document.createElement("button");
         b.className = "choice" + (ch.danger ? " danger" : "");
         const label = typeof ch.text === "function" ? ch.text() : ch.text;
-        b.innerHTML = `<span class="key">${n}</span>${label}`;
+        b.innerHTML = `<span class="key">${n}</span>${T(label)}`;
         b.dataset.key = n; n++;
         b.onmouseenter = () => sfx.select();
         b.onclick = () => {
@@ -497,7 +505,7 @@
     };
     const baseSpeed = node.speed || 20;
     const spd = save.difficulty === "nightmare" ? Math.max(10, baseSpeed - 8) : baseSpeed;
-    typeText(storyEl, node.text || "", spd, () => {
+    typeText(storyEl, T(node.text || ""), spd, () => {
       buildChoices();
       if (node.puzzle) mountPuzzle(node.puzzle);
       if (node.scan) startScan(node.scan);
@@ -520,24 +528,24 @@
     const keys = Object.keys(ENDINGS);
     const got = keys.filter((k) => save.endings[k]).length;
     const badges = keys.map((k) =>
-      `<span class="badge ${save.endings[k] ? "got" : ""}">${save.endings[k] ? ENDINGS[k] : "??? — kilitli"}</span>`
+      `<span class="badge ${save.endings[k] ? "got" : ""}">${save.endings[k] ? T(ENDINGS[k]) : T("??? — kilitli")}</span>`
     ).join("");
     const st = save.stats || {};
-    const stats = `<div class="stats-line">▸ Oynanış: ${st.plays || 0} · Kaçış: ${st.wins || 0} · Ölüm: ${st.deaths || 0} · Çözülen bulmaca: ${st.puzzles || 0}</div>`;
+    const stats = `<div class="stats-line">${T(`▸ Oynanış: ${st.plays || 0} · Kaçış: ${st.wins || 0} · Ölüm: ${st.deaths || 0} · Çözülen bulmaca: ${st.puzzles || 0}`)}</div>`;
     // zorluk seçici
     const d = save.difficulty || "normal";
     const diff = `<div class="diff-row">
-      <button class="diff-btn ${d === "normal" ? "active" : ""}" data-diff="normal">NORMAL · 4 CAN</button>
-      <button class="diff-btn nm ${d === "nightmare" ? "active" : ""}" data-diff="nightmare">KÂBUS · 2 CAN</button>
-    </div><div class="diff-note">${d === "nightmare" ? "Kâbus: daha az can, daha hızlı yayın, daha karanlık." : "Normal: dengeli bir korku deneyimi."}</div>`;
+      <button class="diff-btn ${d === "normal" ? "active" : ""}" data-diff="normal">${T("NORMAL · 4 CAN")}</button>
+      <button class="diff-btn nm ${d === "nightmare" ? "active" : ""}" data-diff="nightmare">${T("KÂBUS · 2 CAN")}</button>
+    </div><div class="diff-note">${d === "nightmare" ? T("Kâbus: daha az can, daha hızlı yayın, daha karanlık.") : T("Normal: dengeli bir korku deneyimi.")}</div>`;
     // başarımlar
     const aKeys = Object.keys(ACHIEVEMENTS);
     const aGot = aKeys.filter((k) => save.achievements[k]).length;
     const aBadges = aKeys.map((k) =>
-      `<span class="ach-badge ${save.achievements[k] ? "got" : ""}" title="${ACHIEVEMENTS[k].desc}">${save.achievements[k] ? "🏆 " + ACHIEVEMENTS[k].name : "🔒 ???"}</span>`
+      `<span class="ach-badge ${save.achievements[k] ? "got" : ""}" title="${T(ACHIEVEMENTS[k].desc)}">${save.achievements[k] ? "🏆 " + T(ACHIEVEMENTS[k].name) : "🔒 ???"}</span>`
     ).join("");
-    const ach = `<div class="ach-wrap"><div class="ach-line">BAŞARIMLAR: ${aGot} / ${aKeys.length}</div><div class="ach-grid">${aBadges}</div></div>`;
-    return `<div class="progress-line">KEŞFEDİLEN SONLAR: ${got} / ${keys.length}</div><div class="gallery">${badges}</div>${stats}${diff}${ach}`;
+    const ach = `<div class="ach-wrap"><div class="ach-line">${T(`BAŞARIMLAR: ${aGot} / ${aKeys.length}`)}</div><div class="ach-grid">${aBadges}</div></div>`;
+    return `<div class="progress-line">${T(`KEŞFEDİLEN SONLAR: ${got} / ${keys.length}`)}</div><div class="gallery">${badges}</div>${stats}${diff}${ach}`;
   }
 
   // hangi düğümde müzik ne kadar gergin olsun
@@ -614,7 +622,7 @@
     wrap.appendChild(msg);
   }
   function setMsg(msg, text, type) {
-    msg.textContent = text;
+    msg.textContent = T(text);
     msg.className = "puzzle-msg" + (type ? " " + type : "");
   }
 
@@ -636,7 +644,7 @@
         d.append(up, nn, dn); dials.appendChild(d); nums.push(nn);
       }
       const btn = document.createElement("button");
-      btn.className = "puzzle-btn"; btn.textContent = "ONAYLA";
+      btn.className = "puzzle-btn"; btn.textContent = T("ONAYLA");
       let tries = 0;
       btn.onclick = () => {
         const guess = cur.join("");
@@ -647,7 +655,7 @@
           tries++; setMsg(msg, "Kilit açılmadı. (" + tries + " deneme)", "err"); sfx.bad(); trackingGlitch();
         }
       };
-      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
       wrap.append(dials, btn);
     };
   }
@@ -673,9 +681,9 @@
         grid.appendChild(b);
       });
       const clr = document.createElement("button");
-      clr.className = "puzzle-btn"; clr.textContent = "TEMİZLE";
+      clr.className = "puzzle-btn"; clr.textContent = T("TEMİZLE");
       clr.onclick = () => { picks = []; disp.textContent = ""; sfx.select(); };
-      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
       wrap.append(disp, grid, clr);
     };
   }
@@ -689,8 +697,8 @@
       const fill = document.createElement("div"); fill.className = "fill"; bar.appendChild(fill);
       const range = document.createElement("input");
       range.type = "range"; range.min = 0; range.max = 100; range.value = Math.random() < 0.5 ? 8 : 92;
-      const lock = document.createElement("div"); lock.className = "lock"; lock.textContent = "SİNYAL: —";
-      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = "KİLİTLE";
+      const lock = document.createElement("div"); lock.className = "lock"; lock.textContent = T("SİNYAL: —");
+      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = T("KİLİTLE");
       let locked = false, noiseGain = null;
       // canlı statik sesi: hedefe yaklaştıkça netleşir
       function upd() {
@@ -700,9 +708,9 @@
         fill.style.opacity = clarity;
         fill.style.width = (2 + clarity * 8) + "px";
         bg.style.filter = `brightness(${0.5 + clarity * 0.5}) saturate(${0.7 + clarity * 0.6})`;
-        if (dist <= tolerance) lock.textContent = "SİNYAL: ● NET";
-        else if (dist <= 18) lock.textContent = "SİNYAL: ◐ yaklaşıyor…";
-        else lock.textContent = "SİNYAL: ○ parazit";
+        if (dist <= tolerance) lock.textContent = T("SİNYAL: ● NET");
+        else if (dist <= 18) lock.textContent = T("SİNYAL: ◐ yaklaşıyor…");
+        else lock.textContent = T("SİNYAL: ○ parazit");
         if (Math.random() < 0.3) noiseBurst(0.04, 0.03 + (1 - clarity) * 0.12);
       }
       range.oninput = () => { if (!locked) { upd(); if (Math.random() < 0.4) sfx.select(); } };
@@ -711,7 +719,7 @@
         if (dist <= tolerance) { locked = true; setMsg(msg, "GÖRÜNTÜ NETLEŞTİ ▸", "ok"); bumpStat("puzzles"); sfx.confirm(); tone(880, 0.3, "triangle", 0.09); bg.style.filter = ""; setTimeout(onSolve, 900); }
         else { setMsg(msg, "Hâlâ parazit var. Kadranı oynat.", "err"); sfx.bad(); trackingGlitch(); }
       };
-      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
       tuner.append(lock, bar, range); wrap.append(tuner, btn);
       upd();
     };
@@ -734,15 +742,15 @@
         };
         row.appendChild(c); cards.push({ n: t.n, el: c });
       });
-      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = "OYNAT";
+      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = T("OYNAT");
       btn.onclick = () => {
         if (order.length !== answer.length) { setMsg(msg, "Tüm kasetleri sıraya koy.", "err"); return; }
         if (order.join("") === answer.join("")) { setMsg(msg, "DOĞRU SIRA — KAYIT AÇILIYOR ▸", "ok"); bumpStat("puzzles"); sfx.confirm(); tone(880, 0.3, "triangle", 0.09); setTimeout(onSolve, 900); }
         else { setMsg(msg, "Kasetler cızırtıyla durdu. Yanlış sıra.", "err"); sfx.bad(); trackingGlitch(); order.forEach(() => {}); }
       };
-      const clr = document.createElement("button"); clr.className = "puzzle-btn"; clr.textContent = "SIFIRLA";
+      const clr = document.createElement("button"); clr.className = "puzzle-btn"; clr.textContent = T("SIFIRLA");
       clr.onclick = () => { order = []; cards.forEach((cc) => { cc.el.classList.remove("sel"); cc.el.querySelector(".ord").textContent = ""; }); sfx.select(); };
-      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
       wrap.append(row, btn, clr);
     };
   }
@@ -756,7 +764,7 @@
         const c = document.createElement("div"); c.className = "mem-cell";
         c.dataset.i = i; grid.appendChild(c); cells.push(c);
       }
-      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = "İZLE ▶";
+      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = T("İZLE ▶");
       const seq = []; let playerIdx = 0; let accepting = false; let level = 0;
       const freqs = [262, 294, 330, 349, 392, 440, 494, 523, 587];
       function light(i, on) { cells[i].classList.toggle("lit", on); }
@@ -790,7 +798,7 @@
         }
       });
       btn.onclick = () => { if (level === 0) nextLevel(); else playSeq(); };
-      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
       wrap.append(grid, btn);
     };
   }
@@ -1407,12 +1415,12 @@
   }
   function closeBag() { bagModal.classList.remove("show"); }
   function renderBag() {
-    if (!state.inv.length) { bagGrid.innerHTML = '<div class="bag-empty">Çantan boş.</div>'; return; }
+    if (!state.inv.length) { bagGrid.innerHTML = `<div class="bag-empty">${T("Çantan boş.")}</div>`; return; }
     bagGrid.innerHTML = "";
     state.inv.forEach((it) => {
       const d = document.createElement("div");
       d.className = "bag-item" + (bagSel.includes(it) ? " sel" : "");
-      d.innerHTML = `<span class="ic">${ITEM_ICON[it] || "▪"}</span><span class="nm">${ITEM_NAMES[it] || it}</span>`;
+      d.innerHTML = `<span class="ic">${ITEM_ICON[it] || "▪"}</span><span class="nm">${T(ITEM_NAMES[it] || it)}</span>`;
       d.onclick = () => {
         if (bagSel.includes(it)) bagSel = bagSel.filter((x) => x !== it);
         else { bagSel.push(it); if (bagSel.length > 2) bagSel.shift(); }
@@ -1422,15 +1430,15 @@
     });
   }
   function combine() {
-    if (bagSel.length !== 2) { bagMsg.textContent = "İki eşya seçmelisin."; bagMsg.className = "bag-msg err"; return; }
+    if (bagSel.length !== 2) { bagMsg.textContent = T("İki eşya seçmelisin."); bagMsg.className = "bag-msg err"; return; }
     const r = tryCombine(bagSel[0], bagSel[1]);
     if (r) {
       take(r.a); take(r.b); give(r.out);
-      bagMsg.textContent = r.msg; bagMsg.className = "bag-msg";
+      bagMsg.textContent = T(r.msg); bagMsg.className = "bag-msg";
       sfx.confirm(); tone(880, 0.3, "triangle", 0.09);
       bagSel = []; renderBag(); renderHUD();
     } else {
-      bagMsg.textContent = "Bu ikisi birleşmiyor.";
+      bagMsg.textContent = T("Bu ikisi birleşmiyor.");
       bagMsg.className = "bag-msg err"; sfx.bad();
     }
   }
@@ -1442,21 +1450,45 @@
   /* ---------- kontroller ---------- */
   $("#mute-btn").onclick = () => {
     muted = !muted;
-    $("#mute-btn").innerHTML = muted ? "&#128263; SESSİZ" : "&#128266; SES";
+    $("#mute-btn").innerHTML = muted ? ("&#128263; " + T("SESSİZ")) : ("&#128266; " + T("SES"));
     $("#mute-btn").classList.toggle("off", muted);
     if (humNode) humNode.gain.gain.value = muted ? 0 : 0.035;
     if (droneNode) droneNode.gain.gain.value = muted ? 0 : 0.012;
     setMusicVol();
   };
   const musicBtn = $("#music-btn");
-  function updateMusicBtn() { musicBtn.classList.toggle("off", !music.on); musicBtn.innerHTML = music.on ? "&#127925; MÜZİK" : "&#127925; MÜZİK KAPALI"; }
+  function updateMusicBtn() { musicBtn.classList.toggle("off", !music.on); musicBtn.innerHTML = "&#127925; " + T(music.on ? "🎵 MÜZİK" : "🎵 MÜZİK KAPALI").replace("🎵 ", ""); }
   musicBtn.onclick = () => { music.on = !music.on; save.musicOn = music.on; persist(); setMusicVol(); updateMusicBtn(); sfx.select(); };
   updateMusicBtn();
   const voBtn = $("#vo-btn");
-  function updateVoBtn() { voBtn.classList.toggle("off", !voOn); voBtn.innerHTML = voOn ? "&#127908; SESLENDİRME" : "&#127908; SESLENDİRME KAPALI"; }
+  function updateVoBtn() { voBtn.classList.toggle("off", !voOn); voBtn.innerHTML = "&#127908; " + T(voOn ? "🎤 SESLENDİRME" : "🎤 SESLENDİRME KAPALI").replace("🎤 ", ""); }
   voBtn.onclick = () => { voOn = !voOn; save.voOn = voOn; persist(); if (!voOn) stopVO(); updateVoBtn(); sfx.select(); };
   updateVoBtn();
   $("#restart-btn").onclick = () => { sfx.confirm(); reset(); go("start"); };
+
+  /* ---------- dil değiştirme (i18n) ---------- */
+  const langBtn = $("#lang-btn");
+  function applyStaticLabels() {
+    // kontrol düğmeleri
+    $("#bag-btn").innerHTML = "&#127890; " + T("ÇANTA");
+    updateVoBtn(); updateMusicBtn();
+    $("#mute-btn").innerHTML = muted ? ("&#128263; " + T("SESSİZ")) : ("&#128266; " + T("SES"));
+    $("#restart-btn").innerHTML = "&#8635; " + T("↺ BAŞA").replace("↺ ", "");
+    langBtn.innerHTML = I18N.lang === "tr" ? "&#127760; EN" : "&#127760; TR";
+    document.documentElement.lang = I18N.lang;
+    // çanta modalı
+    const bt = $(".bag-title"); if (bt) bt.textContent = T("ÇANTA — eşya birleştir");
+    const bh = document.querySelector(".bag-hint"); if (bh) bh.textContent = T("İki eşya seç, sonra BİRLEŞTİR'e bas.");
+    const bc = $("#bag-combine"); if (bc) bc.textContent = T("BİRLEŞTİR");
+    const bcl = $("#bag-close"); if (bcl) bcl.textContent = T("KAPAT");
+  }
+  langBtn.onclick = () => {
+    I18N.lang = I18N.lang === "tr" ? "en" : "tr";
+    save.lang = I18N.lang; persist(); sfx.select();
+    applyStaticLabels();
+    go(state.node || "start"); // mevcut düğümü yeni dilde yeniden çiz
+  };
+  applyStaticLabels();
 
   /* ---------- klavye ---------- */
   document.addEventListener("keydown", (e) => {

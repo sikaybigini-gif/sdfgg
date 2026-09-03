@@ -3,6 +3,7 @@
 Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmacalı** ve dallanan hikayeli bir *analog korku* (analog horror) oyunu. Tavan arasında etiketsiz bir kaset bulursun. Oynatırsın. Kayıttan sağ çıkmaya — ve içine hapsolmuş sekiz izleyeni kurtarmaya — çalışırsın.
 
 ## Özellikler
+- 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca ve başarım metinleri çevrili, seçim `localStorage`'a kaydedilir
 - 🏆 **Başarım sistemi** — 10 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
 - 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
 - 📞 **Gizli telefon ara sahnesi** ve 🧠 **hafıza (Simon) bulmacası** (3x3 TV ızgarası)
@@ -34,6 +35,10 @@ python3 -m http.server 8000
 ```
 Ya da `index.html` dosyasını doğrudan tarayıcıda aç (ses için sayfaya bir kez tıklaman gerekir).
 
+## Language / Dil
+Oyun Türkçe başlar. Kontrol çubuğundaki **🌐 EN / 🌐 TR** düğmesiyle İngilizce ve Türkçe arasında anında geçiş yapabilirsin — mevcut sahne yeni dilde yeniden çizilir ve tercihin kaydedilir.
+_The game starts in Turkish. Use the **🌐 EN / 🌐 TR** button in the control bar to switch between English and Turkish at any time; your choice is remembered._
+
 ## Nasıl oynanır
 Çıkan seçeneklere tıkla (ya da rakam tuşlarına bas). Kararların hikayeyi dallandırır; topladığın eşyaları **ÇANTA** menüsünden birleştirerek yeni yollar açarsın. Bulmacaların ipuçları önceki sahnelerde ve seslendirmelerde saklı. Kırmızı çerçeveli seçenekler tehlikelidir. **Kulaklık şiddetle önerilir.** 🎧
 
@@ -41,6 +46,7 @@ Ya da `index.html` dosyasını doğrudan tarayıcıda aç (ses için sayfaya bir
 - `index.html` — sahne, CRT katmanları, altyazı, çanta modalı ve ses elemanları
 - `style.css` — tüm görsel efektler, bulmaca/çanta arayüzü ve mobil düzen
 - `game.js` — oyun motoru, ses+müzik, seslendirme, bulmaca motoru, birleştirme sistemi ve hikaye ağacı (`STORY`)
+- `i18n.js` — İngilizce çeviri katmanı (`T()` ile TR kaynak metinden çeviri); yeni dil eklemek için buraya bir sözlük eklemen yeterli
 - `images/` — üretilmiş VHS estetikli sahne görselleri
 - `audio/` — üretilmiş Türkçe seslendirme dosyaları
 
