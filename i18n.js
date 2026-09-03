@@ -92,6 +92,14 @@
     "Kâbus modunda kaçtın.": "You escaped on Nightmare difficulty.",
     "Meraklı": "Curious",
     "Telefonu açtın.": "You answered the phone.",
+    "Tesisatçı": "Electrician",
+    "Sigorta kutusunu onardın.": "You repaired the fuse box.",
+    "Şifre Kırıcı": "Codebreaker",
+    "Günlüğün şifresini çözdün.": "You cracked the diary's cipher.",
+    "Bilmececi": "Puzzle Master",
+    "8 bulmaca çözdün.": "You solved 8 puzzles.",
+    "Zarar Görmeden": "Untouched",
+    "Hiç can kaybetmeden kaçtın.": "You escaped without losing any sanity.",
 
     /* ---------- Galeri / başlangıç UI ---------- */
     "NORMAL · 4 CAN": "NORMAL · 4 LIVES",
@@ -129,6 +137,19 @@
     "HAFIZA DOĞRU — YAYIN AÇILIYOR ▸": "MEMORY CORRECT — BROADCAST OPENS ▸",
     "YANLIŞ! Ekranlar çığlık attı. Baştan.": "WRONG! The screens screamed. Start over.",
     "Kâbus modunda daha zorlu. Yanlışta bir can kaybedersin.": "Harder on Nightmare. A wrong tap costs a life.",
+
+    /* ---------- yeni bulmaca mesajları (v9) ---------- */
+    "GÜÇ GERİ GELDİ ▸": "POWER RESTORED ▸",
+    "Önce sol uca, sonra sağdaki eşine dokun. Yanlış eşleşme sistemi bozar.": "Tap a left terminal, then its match on the right. A wrong pair shorts the system.",
+    "İPUCU: Soldaki her renkli ucu, sağdaki aynı renge dokunarak birleştir.": "TIP: Connect each colored terminal on the left to the same color on the right.",
+    "ÇÖZ": "SOLVE",
+    "ŞİFRE ÇÖZÜLDÜ ▸": "CIPHER SOLVED ▸",
+    "Hâlâ anlamsız. Halkayı çevir.": "Still gibberish. Turn the ring.",
+    "İPUCU: Halkayı ◀ ▶ ile çevir, kelime okunur hâle gelince ÇÖZ.": "TIP: Turn the ring with ◀ ▶; when the word reads clearly, press SOLVE.",
+    "Anlamlı Türkçe bir kelime bulana dek çevir.": "Turn until you find a meaningful word.",
+    "FOTOĞRAF TAMAMLANDI ▸": "PHOTO COMPLETE ▸",
+    "İPUCU: Boş kareye komşu parçalara dokunarak kaydır.": "TIP: Slide tiles by tapping the ones next to the empty square.",
+    "Parçalar tamamlanınca mühür kabul eder.": "The seal accepts it once the pieces align.",
 
     /* ---------- Toast ---------- */
     "BAŞARIM AÇILDI": "ACHIEVEMENT UNLOCKED",
@@ -284,6 +305,30 @@
 
     "Bağırdın. Sesin duvarlarda yankılandı ve sekiz farklı ses aynı kelimeleri sana bir saniye gecikmeyle geri bağırdı. Koro seni sardı, kulakların çınlıyor.": "You screamed. Your voice echoed off the walls and eight different voices screamed the same words back at you, one second delayed. The choir surrounded you, your ears ringing.",
     "Sus, çıkışı yeniden ara": "Fall silent, search for the exit again",
+
+    /* ---------- sigorta kutusu (v9) ---------- */
+    "BAND 3 — SİGORTA KUTUSU": "TAPE 3 — FUSE BOX",
+    "Mühürlü kapı elektrikli. Önce gücü geri getir.": "The sealed door is electrified. Restore power first.",
+    "Mühürlü kapının kilidi elektrikli — ama tüm ev karanlık. Duvarda paslı bir sigorta kutusu açık duruyor; renkli kablolar kopmuş, uçları sarkıyor. Her rengi kendi eşine bağlarsan güç geri gelir ve kapı açılır.": "The sealed door's lock is electrified — but the whole house is dark. A rusty fuse box hangs open on the wall; colored wires are severed, their ends dangling. Connect each color to its match and the power returns, opening the door.",
+    "Vazgeç, geri dön": "Give up, go back",
+
+    /* ---------- şifreli günlük (v9) ---------- */
+    "Duvara bir çocuk çizimi ve sararmış bir gazete küpürü iğnelenmiş. Küpürde: “ÜÇ ÇOCUK KAYIP — 1996”. Kenarına kırmızı kalemle üç sayı yuvarlanmış: önce DÖRT, sonra DOKUZ, sonra İKİ. Çizimin altında “kapıyı böyle açtım” yazıyor. Panonun altında, tozların içinde eski bir günlük duruyor.": "A child's drawing and a yellowed newspaper clipping are pinned to the wall. The clipping: “THREE CHILDREN MISSING — 1996.” In the margin, three numbers circled in red: first FOUR, then NINE, then TWO. Under the drawing it reads “this is how I opened the door.” Below the board, in the dust, lies an old diary.",
+    "Şifreli günlüğü incele": "Examine the coded diary",
+    "GÜNLÜK — ŞİFRELİ SAYFA": "DIARY — CODED PAGE",
+    "Günlük harf kaymasıyla yazılmış. Halkayı çevir, çöz.": "The diary is written with a letter shift. Turn the ring, decode it.",
+    "Günlüğün son sayfası anlamsız harflerle dolu — biri bir şeyi gizlemek istemiş. Kenarında bir çözücü halka çizilmiş. Halkayı çevirip harfleri kaydırırsan gizli kelime ortaya çıkar. Yazıyı çöz.": "The diary's last page is full of nonsense letters — someone wanted to hide something. A decoder ring is drawn in the margin. Turn the ring to shift the letters and the hidden word appears. Decode it.",
+    "Vazgeç, panoya dön": "Give up, return to the board",
+    "“İZLEME. Ama izleyeceksin. Hepimiz izledik.”": "“DO NOT WATCH. But you will. We all did.”",
+    "Harfler yerine oturdu: “İZLEME”. Altında normal el yazısı: “Kaseti ilk ben buldum. Sekizden biriyim artık. Sen dokuzuncu olma — ışığı unutma, aynaya bakma, sekizi serbest bırak. Belki o zaman ikimiz de kurtuluruz.” Sayfanın kenarında küçük bir pil çizili — birinin fenere sakladığı yer.": "The letters snapped into place: “DO NOT WATCH.” Below, in ordinary handwriting: “I found the tape first. I'm one of the eight now. Don't become the ninth — remember the light, don't look in the mirror, free the eight. Maybe then we both get out.” A small battery is drawn in the margin — where someone hid it for the flashlight.",
+    "Günlük sana yol gösterdi.": "The diary showed you the way.",
+    "Panoya geri dön": "Return to the board",
+    "Kilide git": "Go to the lock",
+
+    /* ---------- kayan parça (v9) ---------- */
+    "MÜHÜR — FOTOĞRAF": "SEAL — PHOTO",
+    "Fotoğraf yıpranmış. Parçaları yerine kaydır.": "The photo is worn. Slide the pieces into place.",
+    "Fotoğrafı mühre yerleştirmek için parçaları doğru sıraya kaydırman gerek. Kayan parçaları oynatarak sekiz yüzü yeniden birleştir.": "To place the photo on the seal you must slide the pieces into the right order. Move the sliding tiles to reassemble the eight faces.",
 
     "Yüzlerce kaset. Sekiz mum. Ortada bir mühür.": "Hundreds of tapes. Eight candles. A seal in the center.",
     "Mühürlü kapıyı açtın. İçeride duvarlar tavana kadar kasetle kaplı — yüzlerce “YAYIN”. Ortada, mumlarla çevrili bir mühür ve yerde sekiz eski televizyon, hepsi karlı. Her ekranda bir yüz sana bakıyor. Mührü etkisiz kılmak için önce duvardaki sembolleri doğru sırayla izlemelisin.": "You opened the sealed door. Inside, the walls are covered floor to ceiling in tapes — hundreds of “BROADCASTS.” In the center, a seal ringed with candles, and on the floor eight old televisions, all snow. A face on every screen watches you. To neutralize the seal you must first follow the wall symbols in the right order.",

@@ -392,6 +392,46 @@ h1.title{
 .puzzle-btn:hover{background:var(--green);color:#000;box-shadow:0 0 18px rgba(139,255,158,.5);}
 .attempts{font-size:16px;color:#7a5a2a;letter-spacing:2px;}
 
+/* kablo birleştirme */
+.wire-board{position:relative;display:flex;justify-content:space-between;width:min(420px,90%);min-height:230px;padding:8px 4px;background:rgba(6,16,9,.55);border:2px solid var(--dim);}
+.wire-col{display:flex;flex-direction:column;justify-content:space-around;gap:12px;z-index:2;}
+.wire-node{
+  width:30px;height:30px;border-radius:50%;border:3px solid #000;cursor:pointer;
+  background:var(--wc);box-shadow:0 0 8px var(--wc),inset 0 0 6px rgba(0,0,0,.6);transition:transform .1s;
+}
+.wire-node:hover{transform:scale(1.18);}
+.wire-node.sel{outline:3px solid #fff;outline-offset:2px;transform:scale(1.2);}
+.wire-node.wired{cursor:default;box-shadow:0 0 16px var(--wc);}
+.wire-node.bad{animation:shakeX .3s;}
+.wire-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+
+/* şifre çözücü halka */
+.cipher-disp{
+  font-size:34px;letter-spacing:10px;color:#fff;min-height:44px;
+  text-shadow:0 0 12px rgba(139,255,158,.5);background:rgba(6,16,9,.6);
+  border:2px solid var(--dim);padding:8px 20px;font-family:'VT323',monospace;
+}
+.cipher-ring{display:flex;align-items:center;gap:16px;}
+.cipher-arrow{font-size:26px;padding:6px 18px;}
+.cipher-knob{
+  width:64px;height:64px;border-radius:50%;border:3px solid var(--amber);
+  display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--amber);
+  background:radial-gradient(circle,#1a1206,#06110a);box-shadow:0 0 16px rgba(255,182,66,.4),inset 0 0 10px rgba(0,0,0,.7);
+}
+
+/* kayan parça bulmacası */
+.slide-grid{
+  display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;
+  width:min(300px,80vw);aspect-ratio:1/1;background:#000;border:2px solid var(--dim);padding:3px;
+}
+.slide-cell{
+  position:relative;background-color:#0a1a0e;cursor:pointer;overflow:hidden;
+  background-repeat:no-repeat;filter:saturate(.7) brightness(.95);transition:filter .1s;
+}
+.slide-cell:hover:not(.blank){filter:saturate(1) brightness(1.15);}
+.slide-cell.blank{background:#000;cursor:default;box-shadow:inset 0 0 20px rgba(0,0,0,.9);}
+.slide-tag{position:absolute;top:2px;left:4px;font-size:14px;color:var(--amber);text-shadow:0 0 4px #000;font-family:'VT323',monospace;}
+
 /* clue overlay küçük görsel */
 .clue-img{
   width:min(360px,80%);border:2px solid var(--dim);margin:4px auto;display:block;
@@ -470,7 +510,7 @@ h1.title{
 
 /* dokunmatik: highlight kaldır, kaydırmayı engelle */
 *{-webkit-tap-highlight-color:transparent;}
-.choice,.sym,.tapecard,.dial button,.puzzle-btn,.bag-item{touch-action:manipulation;}
+.choice,.sym,.tapecard,.dial button,.puzzle-btn,.bag-item,.wire-node,.slide-cell,.mem-cell,.cipher-arrow{touch-action:manipulation;}
 
 /* ---------- Mobil / küçük ekran ---------- */
 @media (max-width:760px){
@@ -488,6 +528,10 @@ h1.title{
   .sym{font-size:28px;padding:16px 0;}
   .dial .num{font-size:40px;}
   .dial button{font-size:30px;padding:8px 16px;}
+  .wire-node{width:34px;height:34px;}
+  .cipher-disp{font-size:28px;letter-spacing:7px;padding:8px 12px;}
+  .cipher-knob{width:56px;height:56px;font-size:22px;}
+  .slide-grid{width:min(280px,86vw);}
   .tapecard{width:64px;height:86px;}
   .tapecard .tnum{font-size:32px;}
   .gallery{gap:6px;}

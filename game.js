@@ -48,6 +48,10 @@
     all_endings: { name: "Arşivci", desc: "Tüm sonları keşfettin." },
     nightmare: { name: "Kâbus Avcısı", desc: "Kâbus modunda kaçtın." },
     curious: { name: "Meraklı", desc: "Telefonu açtın." },
+    electrician: { name: "Tesisatçı", desc: "Sigorta kutusunu onardın." },
+    decoder: { name: "Şifre Kırıcı", desc: "Günlüğün şifresini çözdün." },
+    puzzle8: { name: "Bilmececi", desc: "8 bulmaca çözdün." },
+    pacifist: { name: "Zarar Görmeden", desc: "Hiç can kaybetmeden kaçtın." },
   };
   let save = loadSave();
 
@@ -78,6 +82,7 @@
   function bumpStat(k, n = 1) {
     save.stats[k] = (save.stats[k] || 0) + n; persist();
     if (k === "puzzles" && save.stats.puzzles >= 5) unlockAch("puzzle5");
+    if (k === "puzzles" && save.stats.puzzles >= 8) unlockAch("puzzle8");
   }
   function unlockAch(id) {
     if (!ACHIEVEMENTS[id] || save.achievements[id]) return;
@@ -89,7 +94,7 @@
 
   /* ---------- durum ---------- */
   function freshState() {
-    return { sanity: (DIFF[save.difficulty] || DIFF.normal).sanity, tape: 0, inv: [], flags: {}, node: "start" };
+    return { sanity: (DIFF[save.difficulty] || DIFF.normal).sanity, tape: 0, inv: [], flags: {}, node: "start", flawless: true };
   }
   let state = freshState();
 
@@ -448,7 +453,7 @@
   }
 
   function damage(n = 1) {
-    state.sanity -= n; sfx.bad(); trackingGlitch(); renderHUD();
+    state.sanity -= n; state.flawless = false; sfx.bad(); trackingGlitch(); renderHUD();
     if (state.sanity <= 0) { setTimeout(() => go("death_sanity"), 420); return true; }
     return false;
   }
@@ -555,6 +560,7 @@
     basement_enter: 0.6, answer_tape: 0.7, count_marks: 0.65, find_exit: 0.7,
     tune_tape: 0.6, second_tape: 0.75, ritual_room: 0.85, symbol_wall: 0.8,
     seal_open: 0.85, tape_order: 0.85, door_lock: 0.6, mem_wall: 0.9, phone: 0.55,
+    fuse_box: 0.8, diary: 0.55, diary_done: 0.5, photo_slide: 0.85,
     dark_room: 0.75, mirror_room: 0.85, mirror_touch: 0.95, front_door: 0.7,
     light_ritual: 1, free_all: 0.9, win_true: 0.4, win_scarred: 0.5, escape_door: 0.6,
     mirror_true: 0.9, death_sanity: 1, look_behind: 1, obey: 0.9, ninth_mark: 1,
@@ -599,6 +605,7 @@
     if (winIds.includes(id)) {
       bumpStat("wins"); unlockAch("survivor");
       if (save.difficulty === "nightmare") unlockAch("nightmare");
+      if (state.flawless) unlockAch("pacifist");
     } else bumpStat("deaths");
     if (id === "free_all") unlockAch("liberator");
     if (id === "mirror_true") unlockAch("mirror");
@@ -803,6 +810,145 @@
     };
   }
 
+  /* ---------- ortak yardımcılar ---------- */
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  /* --- 6) KABLO BİRLEŞTİRME (rewire) --- */
+  function puzzleWires({ colors, hint, onSolve, faultDamage = false }) {
+    return (wrap, msg) => {
+      const SVGNS = "http://www.w3.org/2000/svg";
+      const board = document.createElement("div"); board.className = "wire-board";
+      const svg = document.createElementNS(SVGNS, "svg"); svg.setAttribute("class", "wire-svg");
+      const left = document.createElement("div"); left.className = "wire-col left";
+      const right = document.createElement("div"); right.className = "wire-col right";
+      const rightColors = colors.slice();
+      if (colors.length > 1) { do { shuffle(rightColors); } while (rightColors.every((c, i) => c === colors[i])); }
+      let sel = null, done = 0;
+      function node(color, side) {
+        const n = document.createElement("button"); n.className = "wire-node";
+        n.style.setProperty("--wc", color); n.dataset.color = color; n.dataset.side = side;
+        return n;
+      }
+      const leftNodes = colors.map((c) => node(c, "L"));
+      const rightNodes = rightColors.map((c) => node(c, "R"));
+      leftNodes.forEach((n) => left.appendChild(n));
+      rightNodes.forEach((n) => right.appendChild(n));
+      board.append(left, right, svg);
+      function center(el) {
+        const b = el.getBoundingClientRect(), pb = board.getBoundingClientRect();
+        return { x: b.left + b.width / 2 - pb.left, y: b.top + b.height / 2 - pb.top };
+      }
+      function drawLine(a, b, color) {
+        const p = center(a), q = center(b);
+        const ln = document.createElementNS(SVGNS, "line");
+        ln.setAttribute("x1", p.x); ln.setAttribute("y1", p.y);
+        ln.setAttribute("x2", q.x); ln.setAttribute("y2", q.y);
+        ln.setAttribute("stroke", color); ln.setAttribute("stroke-width", "4");
+        ln.setAttribute("stroke-linecap", "round");
+        ln.style.filter = "drop-shadow(0 0 6px " + color + ")";
+        svg.appendChild(ln);
+      }
+      function pick(n) {
+        if (n.classList.contains("wired")) return;
+        if (n.dataset.side === "L") {
+          leftNodes.forEach((x) => x.classList.remove("sel"));
+          sel = n; n.classList.add("sel"); sfx.select();
+        } else {
+          if (!sel) { sfx.select(); return; }
+          if (sel.dataset.color === n.dataset.color) {
+            sel.classList.add("wired"); n.classList.add("wired"); sel.classList.remove("sel");
+            drawLine(sel, n, n.dataset.color); sfx.pickup(); sel = null; done++;
+            if (done === colors.length) {
+              setMsg(msg, "GÜÇ GERİ GELDİ ▸", "ok"); bumpStat("puzzles"); unlockAch("electrician");
+              sfx.confirm(); tone(880, 0.3, "triangle", 0.09); setTimeout(onSolve, 900);
+            }
+          } else {
+            n.classList.add("bad"); if (sel) sel.classList.remove("sel"); sel = null;
+            sfx.bad(); trackingGlitch(); setTimeout(() => n.classList.remove("bad"), 320);
+            if (faultDamage && save.difficulty === "nightmare") damage(1);
+          }
+        }
+      }
+      leftNodes.concat(rightNodes).forEach((n) => (n.onclick = () => pick(n)));
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
+      wrap.appendChild(board);
+    };
+  }
+
+  /* --- 7) ŞİFRE ÇÖZÜCÜ HALKA (Caesar) --- */
+  function puzzleCipher({ answer, shift, hint, onSolve }) {
+    return (wrap, msg) => {
+      const AZ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const enc = (s, k) => s.replace(/[A-Z]/g, (c) => AZ[(AZ.indexOf(c) + k + 26) % 26]);
+      const ans = (typeof answer === "function" ? answer() : answer).toUpperCase();
+      const cipherText = enc(ans, shift);
+      let cur = 0;
+      const disp = document.createElement("div"); disp.className = "cipher-disp";
+      const ring = document.createElement("div"); ring.className = "cipher-ring";
+      const l = document.createElement("button"); l.className = "puzzle-btn cipher-arrow"; l.textContent = "◀";
+      const knob = document.createElement("div"); knob.className = "cipher-knob";
+      const r = document.createElement("button"); r.className = "puzzle-btn cipher-arrow"; r.textContent = "▶";
+      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = T("ÇÖZ");
+      function upd() { disp.textContent = enc(cipherText, cur); knob.textContent = "+" + cur; }
+      l.onclick = () => { cur = (cur + 25) % 26; sfx.select(); upd(); };
+      r.onclick = () => { cur = (cur + 1) % 26; sfx.select(); upd(); };
+      btn.onclick = () => {
+        if (enc(cipherText, cur) === ans) {
+          setMsg(msg, "ŞİFRE ÇÖZÜLDÜ ▸", "ok"); bumpStat("puzzles"); unlockAch("decoder");
+          sfx.confirm(); tone(880, 0.3, "triangle", 0.09); setTimeout(onSolve, 900);
+        } else { setMsg(msg, "Hâlâ anlamsız. Halkayı çevir.", "err"); sfx.bad(); trackingGlitch(); }
+      };
+      ring.append(l, knob, r);
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
+      wrap.append(disp, ring, btn); upd();
+    };
+  }
+
+  /* --- 8) KAYAN PARÇA (fotoğraf yap-boz) --- */
+  function puzzleSlide({ image = "jumpscare_face.png", size = 3, hint, onSolve }) {
+    const isSolved = (a) => a.every((v, i) => v === i);
+    const solvable = (a, s) => {
+      const arr = a.filter((v) => v !== s * s - 1); let inv = 0;
+      for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) if (arr[i] > arr[j]) inv++;
+      return inv % 2 === 0; // tek genişlikli ızgara: çift terslik = çözülebilir
+    };
+    return (wrap, msg) => {
+      const N = size * size, blank = N - 1;
+      let tiles = [...Array(N).keys()];
+      do { shuffle(tiles); } while (!solvable(tiles, size) || isSolved(tiles));
+      const grid = document.createElement("div"); grid.className = "slide-grid"; grid.style.setProperty("--n", size);
+      function render() {
+        grid.innerHTML = "";
+        tiles.forEach((t, pos) => {
+          const cell = document.createElement("div"); cell.className = "slide-cell";
+          if (t === blank) { cell.classList.add("blank"); }
+          else {
+            const rr = Math.floor(t / size), cc = t % size;
+            cell.style.backgroundImage = `url(images/${image})`;
+            cell.style.backgroundSize = `${size * 100}% ${size * 100}%`;
+            cell.style.backgroundPosition = `${(cc / (size - 1)) * 100}% ${(rr / (size - 1)) * 100}%`;
+            const tag = document.createElement("span"); tag.className = "slide-tag"; tag.textContent = t + 1; cell.appendChild(tag);
+            cell.onclick = () => tryMove(pos);
+          }
+          grid.appendChild(cell);
+        });
+      }
+      function tryMove(pos) {
+        const bi = tiles.indexOf(blank);
+        const pr = Math.floor(pos / size), pc = pos % size, br = Math.floor(bi / size), bc = bi % size;
+        if (Math.abs(pr - br) + Math.abs(pc - bc) === 1) {
+          [tiles[pos], tiles[bi]] = [tiles[bi], tiles[pos]]; sfx.select(); render();
+          if (isSolved(tiles)) {
+            setMsg(msg, "FOTOĞRAF TAMAMLANDI ▸", "ok"); bumpStat("puzzles");
+            sfx.confirm(); tone(880, 0.3, "triangle", 0.09); setTimeout(onSolve, 900);
+          }
+        }
+      }
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
+      wrap.appendChild(grid); render();
+    };
+  }
+
   /* =====================================================================
      HİKÂYE
      ===================================================================== */
@@ -966,11 +1112,40 @@
     clue_note: {
       bg: "bg_clue.png",
       sub: "Üç çocuk kayıp. Sayılar kırmızıyla yuvarlanmış: 4, 9, 2.",
-      text: "Duvara bir çocuk çizimi ve sararmış bir gazete küpürü iğnelenmiş. Küpürde: “ÜÇ ÇOCUK KAYIP — 1996”. Kenarına kırmızı kalemle üç sayı yuvarlanmış: önce DÖRT, sonra DOKUZ, sonra İKİ. Çizimin altında “kapıyı böyle açtım” yazıyor.",
+      text: "Duvara bir çocuk çizimi ve sararmış bir gazete küpürü iğnelenmiş. Küpürde: “ÜÇ ÇOCUK KAYIP — 1996”. Kenarına kırmızı kalemle üç sayı yuvarlanmış: önce DÖRT, sonra DOKUZ, sonra İKİ. Çizimin altında “kapıyı böyle açtım” yazıyor. Panonun altında, tozların içinde eski bir günlük duruyor.",
       onEnter: () => { sfx.whisper(); state.flags.lockClue = true; },
       prompt: "Şifreyi aklında tut.",
       choices: [
         { text: "Kilide geri dön", to: "door_lock" },
+        { text: "Şifreli günlüğü incele", to: "diary", if: () => !state.flags.diaryRead },
+      ],
+    },
+
+    diary: {
+      subtitle: "GÜNLÜK — ŞİFRELİ SAYFA", osd: "PAUSE &#10073;&#10073;", bg: "bg_diary.png",
+      sub: "Günlük harf kaymasıyla yazılmış. Halkayı çevir, çöz.",
+      text: "Günlüğün son sayfası anlamsız harflerle dolu — biri bir şeyi gizlemek istemiş. Kenarında bir çözücü halka çizilmiş. Halkayı çevirip harfleri kaydırırsan gizli kelime ortaya çıkar. Yazıyı çöz.",
+      onEnter: () => { sfx.heart(); sfx.whisper(); },
+      hint: "İPUCU: Halkayı ◀ ▶ ile çevir, kelime okunur hâle gelince ÇÖZ.",
+      puzzle: puzzleCipher({
+        answer: "IZLEME", shift: 7,
+        hint: "Anlamlı Türkçe bir kelime bulana dek çevir.",
+        onSolve: () => { state.flags.diaryRead = true; go("diary_done"); },
+      }),
+      choices: [
+        { text: "Vazgeç, panoya dön", to: "clue_note" },
+      ],
+    },
+
+    diary_done: {
+      bg: "bg_diary.png",
+      sub: "“İZLEME. Ama izleyeceksin. Hepimiz izledik.”",
+      text: "Harfler yerine oturdu: “İZLEME”. Altında normal el yazısı: “Kaseti ilk ben buldum. Sekizden biriyim artık. Sen dokuzuncu olma — ışığı unutma, aynaya bakma, sekizi serbest bırak. Belki o zaman ikimiz de kurtuluruz.” Sayfanın kenarında küçük bir pil çizili — birinin fenere sakladığı yer.",
+      onEnter: () => { sfx.whisper(); if (!has("pil") && !has("fener")) give("pil"); state.flags.knowsHints = true; },
+      prompt: "Günlük sana yol gösterdi.",
+      choices: [
+        { text: "Panoya geri dön", to: "clue_note" },
+        { text: "Kilide git", to: "door_lock" },
       ],
     },
 
@@ -1057,7 +1232,7 @@
       prompt: "Gerçeği öğrendin.",
       choices: [
         { text: "Kaseti ışığa/fenere tut", to: "light_ritual", if: () => has("fener") },
-        { text: "Mühürlü odayı ara", to: "ritual_room", if: () => has("fener") },
+        { text: "Mühürlü odayı ara", to: () => (state.flags.powerOn ? "ritual_room" : "fuse_box"), if: () => has("fener") },
         { text: "Yine de kaseti kır", to: "break_tape" },
       ],
     },
@@ -1108,7 +1283,7 @@
       prompt: "Döngüyü nasıl kırarsın?",
       choices: [
         { text: "Feneri karanlığa tut (ışık ritüeli)", to: "light_ritual", if: () => has("fener") && (state.flags.knowsTruth || has("kaset")) },
-        { text: "Mühürlü kapıyı aç", to: "ritual_room", if: () => has("fener") },
+        { text: "Mühürlü kapıyı aç", to: () => (state.flags.powerOn ? "ritual_room" : "fuse_box"), if: () => has("fener") },
         { text: "İkinci kaseti bul ve oynat", to: "tune_tape", if: () => has("kaset") && !state.flags.knowsTruth },
         { text: "Gözlerini kapat, ışığa körlemesine yürü", to: "eyes_closed" },
         { text: "Kaseti bul ve kır", to: "break_tape" },
@@ -1121,6 +1296,24 @@
       text: "Bağırdın. Sesin duvarlarda yankılandı ve sekiz farklı ses aynı kelimeleri sana bir saniye gecikmeyle geri bağırdı. Koro seni sardı, kulakların çınlıyor.",
       onEnter: () => { noiseBurst(0.5, 0.3); glitch(); sfx.whisper(); },
       choices: [{ text: "Sus, çıkışı yeniden ara", to: "find_exit" }],
+    },
+
+    /* ================= SİGORTA KUTUSU (KABLO BULMACASI) ================= */
+    fuse_box: {
+      subtitle: "BAND 3 — SİGORTA KUTUSU", osd: "PAUSE &#10073;&#10073;", bg: "bg_fusebox.png",
+      sub: "Mühürlü kapı elektrikli. Önce gücü geri getir.",
+      text: "Mühürlü kapının kilidi elektrikli — ama tüm ev karanlık. Duvarda paslı bir sigorta kutusu açık duruyor; renkli kablolar kopmuş, uçları sarkıyor. Her rengi kendi eşine bağlarsan güç geri gelir ve kapı açılır.",
+      onEnter: () => { sfx.heart(); setTimeout(trackingGlitch, 700); },
+      hint: "İPUCU: Soldaki her renkli ucu, sağdaki aynı renge dokunarak birleştir.",
+      puzzle: puzzleWires({
+        colors: ["#e5484d", "#3dd68c", "#4a9eff", "#f5c518", "#c26bff"],
+        hint: "Önce sol uca, sonra sağdaki eşine dokun. Yanlış eşleşme sistemi bozar.",
+        faultDamage: true,
+        onSolve: () => { state.flags.powerOn = true; go("ritual_room"); },
+      }),
+      choices: [
+        { text: "Vazgeç, geri dön", to: "find_exit" },
+      ],
     },
 
     /* ================= YENİ BÖLÜM : RİTÜEL ODASI ================= */
@@ -1163,7 +1356,23 @@
       prompt: "Son bulmaca: kasetleri sırala.",
       choices: [
         { text: "Kasetleri sırala ve oynat", to: "tape_order" },
-        { text: "Fotoğrafı mühre yerleştir (kısa yol)", to: "free_all", if: () => has("fotograf") },
+        { text: "Fotoğrafı mühre yerleştir (kısa yol)", to: "photo_slide", if: () => has("fotograf") },
+      ],
+    },
+
+    photo_slide: {
+      subtitle: "MÜHÜR — FOTOĞRAF", osd: "PAUSE &#10073;&#10073;", bg: "bg_tapewall.png",
+      sub: "Fotoğraf yıpranmış. Parçaları yerine kaydır.",
+      text: "Fotoğrafı mühre yerleştirmek için parçaları doğru sıraya kaydırman gerek. Kayan parçaları oynatarak sekiz yüzü yeniden birleştir.",
+      onEnter: () => { sfx.heart(); },
+      hint: "İPUCU: Boş kareye komşu parçalara dokunarak kaydır.",
+      puzzle: puzzleSlide({
+        image: "jumpscare_face.png", size: 3,
+        hint: "Parçalar tamamlanınca mühür kabul eder.",
+        onSolve: () => go("free_all"),
+      }),
+      choices: [
+        { text: "Vazgeç, mühre dön", to: "seal_open" },
       ],
     },
 
@@ -1202,7 +1411,7 @@
         onSolve: () => go("free_all"),
       }),
       choices: [
-        { text: "Çok zor — fotoğrafı mühre yerleştir (kısa yol)", to: "free_all", if: () => has("fotograf") },
+        { text: "Çok zor — fotoğrafı mühre yerleştir (kısa yol)", to: "photo_slide", if: () => has("fotograf") },
       ],
     },
 

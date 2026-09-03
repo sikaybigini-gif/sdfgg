@@ -4,18 +4,18 @@ Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmaca
 
 ## Özellikler
 - 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca ve başarım metinleri çevrili, seçim `localStorage`'a kaydedilir
-- 🏆 **Başarım sistemi** — 10 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 🏆 **Başarım sistemi** — 14 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
 - 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
 - 📞 **Gizli telefon ara sahnesi** ve 🧠 **hafıza (Simon) bulmacası** (3x3 TV ızgarası)
 - 🔦 **Fener tarama mekaniği** — zifiri karanlık odada fareyle/dokunuşla ışık gezdirip gizli çıkışı ve ipuçlarını bulma
 - 🪞 **4 bölüm** — koridor → bodrum → mühürlü ritüel odası → kaçış (karanlık + ayna odası + ön kapı)
 - 💾 **Checkpoint / kaldığın yerden devam** — bölüm başları otomatik kaydedilir, başlangıç ekranından devam edebilirsin
 - 📊 **İstatistikler** — oynanış, kaçış, ölüm ve çözülen bulmaca sayısı kalıcı olarak tutulur
-- 🧩 **5 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi, kaset kronolojisi sıralama ve hafıza dizisi
+- 🧩 **8 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi, kaset kronolojisi sıralama, hafıza dizisi (Simon), **renk kablosu birleştirme (sigorta kutusu)**, **Sezar şifre çözücü halka (gizli günlük)** ve **kayan parça fotoğraf yap-bozu**
 - 🎒 **Envanter + eşya birleştirme** — parçaları çantada birleştir (bozuk fener + pil → çalışır fener; fotoğrafın iki yarısı → tam fotoğraf)
 - 🎵 **Prosedürel ambient korku müziği** — sürekli evrilen, sahneye göre yoğunlaşan atmosfer (pad + detone notalar + derin darbeler + yankı)
 - 🎤 **Tam Türkçe seslendirme** — anlatıcı + kasetten "kendi sesinle" konuşan varlık, senkronize altyazılarla
-- 🖼️ **Üretilmiş korku görselleri** — 15 VHS estetikli sahne (tavan arası, koridor, merdivendeki yüzsüz kadın, bodrum, dolap, ritüel/kaset duvarı, sembol duvarı, kilit, ipucu panosu, jumpscare yüzü...)
+- 🖼️ **Üretilmiş korku görselleri** — 22 VHS estetikli sahne (tavan arası, koridor, merdivendeki yüzsüz kadın, bodrum, dolap, ritüel/kaset duvarı, sembol duvarı, kilit, ipucu panosu, sigorta kutusu, şifreli günlük, jumpscare yüzü...)
 - 👻 **3 bölümlük derin hikaye** — koridor → bodrum → mühürlü ritüel odası
 - 🏆 **13 farklı son + kalıcı galeri** — açtığın sonlar `localStorage`'a kaydedilir, başlangıç ekranında galeri olarak görünür
 - ❤️ **Akıl sağlığı sistemi** — 4 kademe; düştükçe ekran kırmızı nabız atar
