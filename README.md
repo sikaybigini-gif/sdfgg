@@ -38,6 +38,14 @@ python3 -m http.server 8000
 ```
 Ya da `index.html` dosyasını doğrudan tarayıcıda aç (ses için sayfaya bir kez tıklaman gerekir).
 
+## Tek dosyalık sürüm (çevrimdışı / taşınabilir)
+`yayin08-standalone.html` — CSS, JavaScript, tüm görseller ve sesler **tek bir HTML dosyasına gömülüdür**. Sunucuya gerek yok: dosyayı çift tıklayıp doğrudan tarayıcıda açarsın, internet bağlantısı olmadan çalışır (yalnızca web fontları çevrimiçiyken yüklenir, offline'da sistem yazı tipine düşer). Görseller boyut için sıkıştırılmıştır; dosya ~2 MB'tır.
+
+Yeniden üretmek için (kaynak dosyalar değişince):
+```bash
+python3 build-standalone.py   # ImageMagick 'convert' önerilir (görsel küçültme)
+```
+
 ## Language / Dil
 Oyun Türkçe başlar. Kontrol çubuğundaki **🌐 EN / 🌐 TR** düğmesiyle İngilizce ve Türkçe arasında anında geçiş yapabilirsin — mevcut sahne yeni dilde yeniden çizilir ve tercihin kaydedilir.
 _The game starts in Turkish. Use the **🌐 EN / 🌐 TR** button in the control bar to switch between English and Turkish at any time; your choice is remembered._
@@ -52,5 +60,7 @@ _The game starts in Turkish. Use the **🌐 EN / 🌐 TR** button in the control
 - `i18n.js` — İngilizce çeviri katmanı (`T()` ile TR kaynak metinden çeviri); yeni dil eklemek için buraya bir sözlük eklemen yeterli
 - `images/` — üretilmiş VHS estetikli sahne görselleri
 - `audio/` — üretilmiş Türkçe seslendirme dosyaları
+- `build-standalone.py` — tüm assetleri gömerek tek dosyalık `yayin08-standalone.html` üreten betik (kaynak dosyalara dokunmaz)
+- `yayin08-standalone.html` — çevrimdışı, çift tıkla-oyna tek dosya sürüm (üretilmiş çıktı)
 
 Hikaye tamamen `game.js` içindeki `STORY` nesnesinde. Her düğüme `vo`/`sub` (seslendirme+altyazı) ve `puzzle` (bulmaca) ekleyerek genişletebilirsin.
