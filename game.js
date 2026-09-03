@@ -36,27 +36,64 @@
     become: "DÖNGÜ — Sen Oldun",
     mirror_death: "ÖLÜM — Ayna Seni Aldı",
   };
+  /* başarımlar */
+  const ACHIEVEMENTS = {
+    first_play: { name: "İlk Kaset", desc: "Kaseti ilk kez oynattın." },
+    survivor: { name: "Hayatta Kalan", desc: "İlk kez kayıttan sağ çıktın." },
+    truth: { name: "Gerçeği Gören", desc: "İkinci kasetin sırrını öğrendin." },
+    puzzle5: { name: "Kâşif", desc: "5 bulmaca çözdün." },
+    all_items: { name: "Toplayıcı", desc: "Feneri ve tam fotoğrafı bir arada taşıdın." },
+    liberator: { name: "Kurtarıcı", desc: "Sekiz izleyeni serbest bıraktın." },
+    mirror: { name: "Aynadaki Sen", desc: "En iyi sonu buldun." },
+    all_endings: { name: "Arşivci", desc: "Tüm sonları keşfettin." },
+    nightmare: { name: "Kâbus Avcısı", desc: "Kâbus modunda kaçtın." },
+    curious: { name: "Meraklı", desc: "Telefonu açtın." },
+  };
   let save = loadSave();
   function loadSave() {
-    const def = { endings: {}, voOn: true, musicOn: true, stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, checkpoint: null };
+    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal",
+      stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, checkpoint: null };
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY));
       if (!s) return def;
-      return Object.assign(def, s, { stats: Object.assign(def.stats, s.stats || {}) });
+      return Object.assign(def, s, {
+        stats: Object.assign(def.stats, s.stats || {}),
+        achievements: s.achievements || {},
+        endings: s.endings || {},
+      });
     } catch { return def; }
   }
   function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch {} }
   function unlockEnding(id) {
     if (ENDINGS[id] && !save.endings[id]) { save.endings[id] = true; persist(); }
+    // tüm sonlar açıldı mı?
+    if (Object.keys(ENDINGS).every((k) => save.endings[k])) unlockAch("all_endings");
   }
-  function bumpStat(k, n = 1) { save.stats[k] = (save.stats[k] || 0) + n; persist(); }
+  function bumpStat(k, n = 1) {
+    save.stats[k] = (save.stats[k] || 0) + n; persist();
+    if (k === "puzzles" && save.stats.puzzles >= 5) unlockAch("puzzle5");
+  }
+  function unlockAch(id) {
+    if (!ACHIEVEMENTS[id] || save.achievements[id]) return;
+    save.achievements[id] = true; persist();
+    toast(ACHIEVEMENTS[id]);
+  }
+  // zorluk: normal 4 can, kâbus 2 can + daha hızlı yazı
+  const DIFF = { normal: { sanity: 4, label: "NORMAL" }, nightmare: { sanity: 2, label: "KÂBUS" } };
 
   /* ---------- durum ---------- */
-  const initial = { sanity: 4, tape: 0, inv: [], flags: {}, node: "start" };
-  let state = structuredClone(initial);
+  function freshState() {
+    return { sanity: (DIFF[save.difficulty] || DIFF.normal).sanity, tape: 0, inv: [], flags: {}, node: "start" };
+  }
+  let state = freshState();
 
   const has = (item) => state.inv.includes(item);
-  const give = (item) => { if (!has(item)) { state.inv.push(item); flashItem(item); } };
+  const give = (item) => {
+    if (!has(item)) {
+      state.inv.push(item); flashItem(item);
+      if (has("fener") && has("fotograf")) unlockAch("all_items");
+    }
+  };
   const take = (item) => { state.inv = state.inv.filter((i) => i !== item); };
 
   const ITEM_NAMES = {
@@ -364,7 +401,8 @@
     let hud = $(".hud");
     if (!hud) { hud = document.createElement("div"); hud.className = "hud"; crt.appendChild(hud); }
     const s = Math.max(0, state.sanity);
-    const hearts = "◆".repeat(s) + `<span class="empty">${"◇".repeat(Math.max(0, 4 - s))}</span>`;
+    const maxS = (DIFF[save.difficulty] || DIFF.normal).sanity;
+    const hearts = "◆".repeat(s) + `<span class="empty">${"◇".repeat(Math.max(0, maxS - s))}</span>`;
     const items = state.inv.length ? state.inv.map((i) => ITEM_NAMES[i] || i).join(" · ") : "<span class='empty'>boş</span>";
     hud.innerHTML =
       `<div><span class="lbl">AKIL SAĞLIĞI</span><br>${hearts}</div>` +
@@ -380,6 +418,27 @@
     requestAnimationFrame(() => { t.style.top = "13%"; t.style.opacity = "0"; });
     setTimeout(() => t.remove(), 1300);
   }
+
+  /* ---------- başarım bildirimi ---------- */
+  const toastQueue = [];
+  let toastBusy = false;
+  function toast(ach) {
+    toastQueue.push(ach);
+    if (!toastBusy) nextToast();
+  }
+  function nextToast() {
+    if (!toastQueue.length) { toastBusy = false; return; }
+    toastBusy = true;
+    const ach = toastQueue.shift();
+    const el = document.createElement("div");
+    el.className = "ach-toast";
+    el.innerHTML = `<div class="ach-ic">🏆</div><div><div class="ach-h">BAŞARIM AÇILDI</div><div class="ach-n">${ach.name}</div><div class="ach-d">${ach.desc}</div></div>`;
+    crt.appendChild(el);
+    sfx.pickup(); setTimeout(() => tone(1046, 0.2, "triangle", 0.07), 120);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => { el.remove(); nextToast(); }, 500); }, 3200);
+  }
+
   function damage(n = 1) {
     state.sanity -= n; sfx.bad(); trackingGlitch(); renderHUD();
     if (state.sanity <= 0) { setTimeout(() => go("death_sanity"), 420); return true; }
@@ -436,11 +495,23 @@
         choicesEl.appendChild(b);
       });
     };
-    typeText(storyEl, node.text || "", node.speed || 20, () => {
+    const baseSpeed = node.speed || 20;
+    const spd = save.difficulty === "nightmare" ? Math.max(10, baseSpeed - 8) : baseSpeed;
+    typeText(storyEl, node.text || "", spd, () => {
       buildChoices();
       if (node.puzzle) mountPuzzle(node.puzzle);
       if (node.scan) startScan(node.scan);
     });
+    // zorluk seçici butonları
+    if (node.gallery) {
+      screen.querySelectorAll(".diff-btn").forEach((b) => {
+        b.onclick = () => {
+          save.difficulty = b.dataset.diff; persist(); sfx.select();
+          state.sanity = (DIFF[save.difficulty] || DIFF.normal).sanity;
+          render(node); // galeriyi yeniden çiz
+        };
+      });
+    }
     if (node.onEnter) node.onEnter();
     renderHUD();
   }
@@ -453,7 +524,20 @@
     ).join("");
     const st = save.stats || {};
     const stats = `<div class="stats-line">▸ Oynanış: ${st.plays || 0} · Kaçış: ${st.wins || 0} · Ölüm: ${st.deaths || 0} · Çözülen bulmaca: ${st.puzzles || 0}</div>`;
-    return `<div class="progress-line">KEŞFEDİLEN SONLAR: ${got} / ${keys.length}</div><div class="gallery">${badges}</div>${stats}`;
+    // zorluk seçici
+    const d = save.difficulty || "normal";
+    const diff = `<div class="diff-row">
+      <button class="diff-btn ${d === "normal" ? "active" : ""}" data-diff="normal">NORMAL · 4 CAN</button>
+      <button class="diff-btn nm ${d === "nightmare" ? "active" : ""}" data-diff="nightmare">KÂBUS · 2 CAN</button>
+    </div><div class="diff-note">${d === "nightmare" ? "Kâbus: daha az can, daha hızlı yayın, daha karanlık." : "Normal: dengeli bir korku deneyimi."}</div>`;
+    // başarımlar
+    const aKeys = Object.keys(ACHIEVEMENTS);
+    const aGot = aKeys.filter((k) => save.achievements[k]).length;
+    const aBadges = aKeys.map((k) =>
+      `<span class="ach-badge ${save.achievements[k] ? "got" : ""}" title="${ACHIEVEMENTS[k].desc}">${save.achievements[k] ? "🏆 " + ACHIEVEMENTS[k].name : "🔒 ???"}</span>`
+    ).join("");
+    const ach = `<div class="ach-wrap"><div class="ach-line">BAŞARIMLAR: ${aGot} / ${aKeys.length}</div><div class="ach-grid">${aBadges}</div></div>`;
+    return `<div class="progress-line">KEŞFEDİLEN SONLAR: ${got} / ${keys.length}</div><div class="gallery">${badges}</div>${stats}${diff}${ach}`;
   }
 
   // hangi düğümde müzik ne kadar gergin olsun
@@ -462,7 +546,7 @@
     tape1: 0.2, rewind1: 0.5, look_dark: 0.5, cant_stop: 0.7, stairs: 0.55,
     basement_enter: 0.6, answer_tape: 0.7, count_marks: 0.65, find_exit: 0.7,
     tune_tape: 0.6, second_tape: 0.75, ritual_room: 0.85, symbol_wall: 0.8,
-    seal_open: 0.85, tape_order: 0.85, door_lock: 0.6,
+    seal_open: 0.85, tape_order: 0.85, door_lock: 0.6, mem_wall: 0.9, phone: 0.55,
     dark_room: 0.75, mirror_room: 0.85, mirror_touch: 0.95, front_door: 0.7,
     light_ritual: 1, free_all: 0.9, win_true: 0.4, win_scarred: 0.5, escape_door: 0.6,
     mirror_true: 0.9, death_sanity: 1, look_behind: 1, obey: 0.9, ninth_mark: 1,
@@ -504,8 +588,12 @@
     if (endingCounted === id) return; // aynı ekranda iki kez sayma
     endingCounted = id;
     const winIds = ["light_ritual", "win_true", "win_scarred", "free_all", "escape_door", "mirror_true"];
-    if (winIds.includes(id)) bumpStat("wins");
-    else bumpStat("deaths");
+    if (winIds.includes(id)) {
+      bumpStat("wins"); unlockAch("survivor");
+      if (save.difficulty === "nightmare") unlockAch("nightmare");
+    } else bumpStat("deaths");
+    if (id === "free_all") unlockAch("liberator");
+    if (id === "mirror_true") unlockAch("mirror");
     save.checkpoint = null; persist(); updateResumeBtn(); // son gelince checkpoint temizlenir
   }
 
@@ -659,6 +747,54 @@
     };
   }
 
+  /* --- 5) HAFIZA (SIMON) : 3x3 TV IZGARASI --- */
+  function puzzleMemory({ rounds = 4, onSolve, hint }) {
+    return (wrap, msg) => {
+      const grid = document.createElement("div"); grid.className = "mem-grid";
+      const cells = [];
+      for (let i = 0; i < 9; i++) {
+        const c = document.createElement("div"); c.className = "mem-cell";
+        c.dataset.i = i; grid.appendChild(c); cells.push(c);
+      }
+      const btn = document.createElement("button"); btn.className = "puzzle-btn"; btn.textContent = "İZLE ▶";
+      const seq = []; let playerIdx = 0; let accepting = false; let level = 0;
+      const freqs = [262, 294, 330, 349, 392, 440, 494, 523, 587];
+      function light(i, on) { cells[i].classList.toggle("lit", on); }
+      function flash(i, cb) {
+        light(i, true); tone(freqs[i], 0.32, "sine", 0.09); noiseBurst(0.05, 0.03);
+        setTimeout(() => { light(i, false); setTimeout(cb, 180); }, 380);
+      }
+      function playSeq() {
+        accepting = false; setMsg(msg, "İZLE…", ""); let k = 0;
+        (function step() {
+          if (k >= seq.length) { accepting = true; playerIdx = 0; setMsg(msg, "ŞİMDİ TEKRARLA (" + (level) + "/" + rounds + ")", ""); return; }
+          flash(seq[k++], step);
+        })();
+      }
+      function nextLevel() {
+        level++;
+        if (level > rounds) { setMsg(msg, "HAFIZA DOĞRU — YAYIN AÇILIYOR ▸", "ok"); bumpStat("puzzles"); sfx.confirm(); tone(880, 0.3, "triangle", 0.09); accepting = false; setTimeout(onSolve, 1000); return; }
+        seq.push(Math.floor(Math.random() * 9));
+        setTimeout(playSeq, 600);
+      }
+      cells.forEach((c, i) => c.onclick = () => {
+        if (!accepting) return;
+        flash(i, () => {});
+        if (seq[playerIdx] === i) {
+          playerIdx++;
+          if (playerIdx >= seq.length) { accepting = false; sfx.pickup(); setTimeout(nextLevel, 500); }
+        } else {
+          accepting = false; setMsg(msg, "YANLIŞ! Ekranlar çığlık attı. Baştan.", "err");
+          sfx.bad(); trackingGlitch(); if (damage(1)) return;
+          seq.length = 0; level = 0; setTimeout(nextLevel, 1200);
+        }
+      });
+      btn.onclick = () => { if (level === 0) nextLevel(); else playSeq(); };
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = hint; wrap.appendChild(h); }
+      wrap.append(grid, btn);
+    };
+  }
+
   /* =====================================================================
      HİKÂYE
      ===================================================================== */
@@ -673,7 +809,7 @@
       prompt: "Kaseti oynatmak istiyor musun?",
       onEnter: () => { updateResumeBtn(); },
       choices: [
-        { text: "OYNAT ▶ (yeni oyun)", to: "tape1", action: () => { audioInit(); bumpStat("plays"); } },
+        { text: "OYNAT ▶ (yeni oyun)", to: "tape1", action: () => { audioInit(); bumpStat("plays"); unlockAch("first_play"); } },
         { text: () => `KALDIĞIN YERDEN DEVAM ET ▸ (${save.checkpoint ? CHAPTER_NAME[save.checkpoint.node] || "bölüm" : ""})`, action: () => { audioInit(); resumeCheckpoint(); }, if: () => !!save.checkpoint },
         { text: "Kaseti geri koy, odadan çık", to: "coward" },
       ],
@@ -781,7 +917,20 @@
       choices: [
         { text: "Yanından sessizce geç", to: "pass_figure" },
         { text: "Bir odaya saklan", to: "hide_room" },
+        { text: "Çalan telefonu yanıtla", to: "phone", if: () => !state.flags.phoned },
         { text: "Feneri yüzüne tut", to: "flash_figure", danger: true, if: () => has("fener") },
+      ],
+    },
+
+    phone: {
+      subtitle: "GİZLİ KAYIT — TELEFON", osd: "PAUSE &#10073;&#10073;", bg: "bg_phone.png",
+      sub: "Telefonun öbür ucunda kendi sesin: dört… dokuz… iki.",
+      text: "Yan odada eski bir çevirmeli telefon çalıyor. Ahizeyi kaldırdın. Parazitin ardından bir ses — senin sesin — üç sayı fısıldıyor: “dört… dokuz… iki. Kapıyı böyle açtım. Ama sonra pişman oldum.” Hat kesildi.",
+      onEnter: () => { sfx.heart(); sfx.whisper(); state.flags.phoned = true; state.flags.lockClue = true; unlockAch("curious"); },
+      prompt: "Şifreyi öğrendin: 4-9-2.",
+      choices: [
+        { text: "Merdivene geri dön", to: "stairs" },
+        { text: "Doğruca aşağı in", to: "pass_figure" },
       ],
     },
 
@@ -896,7 +1045,7 @@
       vo: "vo_entity1.mp3", entity: true,
       sub: "İlk izleyen: kaseti ışığa tut. O karanlıkta yaşıyor.",
       text: "Sinyal netleşti. Ekranda ilk izleyen beliriyor: yıllar önce, aynı koltukta, aynı korkuyla. “Kim izliyorsa,” diyor, “kaseti ışığa tut. O karanlıkta yaşıyor; ışık onu çözer. Ama sekizini kurtarmak istersen mühürlü odayı bul — duvardaki sembolleri doğru sırayla izle.” Elinde fener var.",
-      onEnter: () => { glitch(); sfx.whisper(); state.flags.knowsTruth = true; },
+      onEnter: () => { glitch(); sfx.whisper(); state.flags.knowsTruth = true; unlockAch("truth"); },
       prompt: "Gerçeği öğrendin.",
       choices: [
         { text: "Kaseti ışığa/fenere tut", to: "light_ritual", if: () => has("fener") },
@@ -1026,10 +1175,26 @@
         ],
         answer: [1, 2, 3, 4, 5],
         hint: "Kasetlere dokunarak sıra numarası ver. OYNAT'a bas.",
-        onSolve: () => go("free_all"),
+        onSolve: () => go("mem_wall"),
       }),
       choices: [
         { text: "Vazgeç, mühre dön", to: "seal_open" },
+      ],
+    },
+
+    mem_wall: {
+      subtitle: "SON KAYIT — HAFIZA", osd: "PLAY &#9658;", bg: "bg_grid.png",
+      sub: "Dokuz ekran sırayla yanıyor. Sekizi kurtarmak için hatırla.",
+      text: "Kasetler doğru sırayla oynadı ve duvardaki dokuz televizyon canlandı. Ekranlarda “SENİ DUYUYORUM” yazıyor. Sekizi serbest bırakmak için ekranların yanış sırasını hatırlayıp tekrarlamalısın. Her tur bir isim, bir çocuk.",
+      onEnter: () => { sfx.heart(); sfx.whisper(); },
+      hint: "İZLE ▶ ile başlat. Yanan ekranları aynı sırayla tekrarla.",
+      puzzle: puzzleMemory({
+        rounds: 4,
+        hint: "Kâbus modunda daha zorlu. Yanlışta bir can kaybedersin.",
+        onSolve: () => go("free_all"),
+      }),
+      choices: [
+        { text: "Çok zor — fotoğrafı mühre yerleştir (kısa yol)", to: "free_all", if: () => has("fotograf") },
       ],
     },
 
@@ -1226,7 +1391,7 @@
   };
 
   function reset() {
-    state = structuredClone(initial);
+    state = freshState();
     tapeSecs = 0; setBg(null); stopVO(); setIntensity(0);
     if (humNode) humNode.gain.gain.value = 0.035;
   }

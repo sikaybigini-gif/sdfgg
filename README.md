@@ -3,11 +3,14 @@
 Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmacalı** ve dallanan hikayeli bir *analog korku* (analog horror) oyunu. Tavan arasında etiketsiz bir kaset bulursun. Oynatırsın. Kayıttan sağ çıkmaya — ve içine hapsolmuş sekiz izleyeni kurtarmaya — çalışırsın.
 
 ## Özellikler
+- 🏆 **Başarım sistemi** — 10 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
+- 📞 **Gizli telefon ara sahnesi** ve 🧠 **hafıza (Simon) bulmacası** (3x3 TV ızgarası)
 - 🔦 **Fener tarama mekaniği** — zifiri karanlık odada fareyle/dokunuşla ışık gezdirip gizli çıkışı ve ipuçlarını bulma
 - 🪞 **4 bölüm** — koridor → bodrum → mühürlü ritüel odası → kaçış (karanlık + ayna odası + ön kapı)
 - 💾 **Checkpoint / kaldığın yerden devam** — bölüm başları otomatik kaydedilir, başlangıç ekranından devam edebilirsin
 - 📊 **İstatistikler** — oynanış, kaçış, ölüm ve çözülen bulmaca sayısı kalıcı olarak tutulur
-- 🧩 **4 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi ve kaset kronolojisi sıralama
+- 🧩 **5 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi, kaset kronolojisi sıralama ve hafıza dizisi
 - 🎒 **Envanter + eşya birleştirme** — parçaları çantada birleştir (bozuk fener + pil → çalışır fener; fotoğrafın iki yarısı → tam fotoğraf)
 - 🎵 **Prosedürel ambient korku müziği** — sürekli evrilen, sahneye göre yoğunlaşan atmosfer (pad + detone notalar + derin darbeler + yankı)
 - 🎤 **Tam Türkçe seslendirme** — anlatıcı + kasetten "kendi sesinle" konuşan varlık, senkronize altyazılarla
