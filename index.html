@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YAYIN 08 — Analog Korku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="crt" class="booting">
+    <!-- arka plan görsel -->
+    <div id="bg"></div>
+    <div id="screen-dim"></div>
+
+    <!-- CRT efekt katmanları -->
+    <canvas id="static"></canvas>
+    <div class="scanlines"></div>
+    <div class="rgbshift"></div>
+    <div class="vignette"></div>
+    <div class="tracking"></div>
+
+    <!-- VHS OSD -->
+    <div class="osd">
+      <span class="rec"><span class="dot"></span>REC</span>
+      <span id="osd-time">SP 0:00:00</span>
+      <span id="osd-ch">CH 08 &bull; PLAY &#9658;</span>
+    </div>
+    <div class="osd-date" id="osd-date">-- --- ----</div>
+
+    <!-- kontroller -->
+    <div class="controls">
+      <button class="ctrl-btn" id="bag-btn">&#127890; ÇANTA</button>
+      <button class="ctrl-btn" id="vo-btn">&#127908; SESLENDİRME</button>
+      <button class="ctrl-btn" id="music-btn">&#127925; MÜZİK</button>
+      <button class="ctrl-btn" id="mute-btn">&#128266; SES</button>
+      <button class="ctrl-btn" id="restart-btn">&#8635; BAŞA</button>
+    </div>
+
+    <!-- seslendirme çalar -->
+    <audio id="vo-audio"></audio>
+
+    <!-- oyun ekranı -->
+    <main id="screen"></main>
+
+    <!-- altyazı -->
+    <div id="subtitle-bar"></div>
+
+    <!-- envanter / birleştirme modalı -->
+    <div id="bag-modal" class="bag-modal">
+      <div class="bag-panel">
+        <div class="bag-title">ÇANTA — eşya birleştir</div>
+        <div class="bag-hint">İki eşya seç, sonra BİRLEŞTİR'e bas.</div>
+        <div id="bag-grid" class="bag-grid"></div>
+        <div id="bag-msg" class="bag-msg"></div>
+        <div class="bag-actions">
+          <button class="puzzle-btn" id="bag-combine">BİRLEŞTİR</button>
+          <button class="puzzle-btn" id="bag-close">KAPAT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- jumpscare -->
+    <div id="scare"></div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
