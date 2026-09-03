@@ -55,13 +55,18 @@
   };
   let save = loadSave();
 
+  /* ---------- efektleri azalt (fotosensitivite / erişilebilirlik) ---------- */
+  const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let reduceFx = save.reduceFx === true || (save.reduceFx == null && prefersReduced);
+  function applyReduceFx() { crt.classList.toggle("safe", reduceFx); }
+
   /* ---------- çeviri (i18n) ---------- */
   const I18N = window.YAYIN_I18N || { lang: "tr", t: (s) => s };
   I18N.lang = save.lang || "tr";
   const T = (s) => I18N.t(s);
 
   function loadSave() {
-    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal", lang: "tr",
+    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal", lang: "tr", reduceFx: false,
       stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, checkpoint: null };
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -331,20 +336,22 @@
 
   /* ---------- efektler ---------- */
   function trackingGlitch() {
-    tracking.classList.remove("show"); void tracking.offsetWidth;
-    tracking.classList.add("show"); noiseBurst(0.14, 0.1);
+    if (!reduceFx) { tracking.classList.remove("show"); void tracking.offsetWidth; tracking.classList.add("show"); }
+    noiseBurst(0.14, 0.1);
   }
-  function glitch() { crt.classList.add("glitch"); setTimeout(() => crt.classList.remove("glitch"), 320); }
+  function glitch() { if (reduceFx) return; crt.classList.add("glitch"); setTimeout(() => crt.classList.remove("glitch"), 320); }
 
   let scareTimer = null;
   function jumpscare({ img = null, glyph = "◉", duration = 800 } = {}) {
     glitch(); sfx.scare();
     if (img) { scare.style.backgroundImage = `url(images/${img})`; scare.innerHTML = ""; }
     else { scare.style.backgroundImage = "none"; scare.innerHTML = `<div class="glyph">${glyph}</div>`; }
-    scare.classList.add("fire");
-    if (navigator.vibrate) navigator.vibrate([140, 50, 120]);
+    scare.classList.add("fire"); scare.style.opacity = "1";
+    if (navigator.vibrate && !reduceFx) navigator.vibrate([140, 50, 120]);
     clearTimeout(scareTimer);
-    scareTimer = setTimeout(() => { scare.classList.remove("fire"); scare.style.opacity = "0"; }, duration);
+    // safe modda süre kısaltılır (daha yumuşak deneyim)
+    const dur = reduceFx ? Math.min(duration, 520) : duration;
+    scareTimer = setTimeout(() => { scare.classList.remove("fire"); scare.style.opacity = "0"; }, dur);
   }
 
   function setBg(img) {
@@ -1673,6 +1680,11 @@
   function updateVoBtn() { voBtn.classList.toggle("off", !voOn); voBtn.innerHTML = "&#127908; " + T(voOn ? "🎤 SESLENDİRME" : "🎤 SESLENDİRME KAPALI").replace("🎤 ", ""); }
   voBtn.onclick = () => { voOn = !voOn; save.voOn = voOn; persist(); if (!voOn) stopVO(); updateVoBtn(); sfx.select(); };
   updateVoBtn();
+  // efektleri azalt düğmesi
+  const safeBtn = $("#safe-btn");
+  function updateSafeBtn() { safeBtn.classList.toggle("off", reduceFx); safeBtn.innerHTML = "&#9889; " + T(reduceFx ? "EFEKT AZ" : "EFEKT"); }
+  safeBtn.onclick = () => { reduceFx = !reduceFx; save.reduceFx = reduceFx; persist(); applyReduceFx(); updateSafeBtn(); sfx.select(); };
+  applyReduceFx(); updateSafeBtn();
   $("#restart-btn").onclick = () => { sfx.confirm(); reset(); go("start"); };
 
   /* ---------- dil değiştirme (i18n) ---------- */
@@ -1680,7 +1692,7 @@
   function applyStaticLabels() {
     // kontrol düğmeleri
     $("#bag-btn").innerHTML = "&#127890; " + T("ÇANTA");
-    updateVoBtn(); updateMusicBtn();
+    updateVoBtn(); updateMusicBtn(); updateSafeBtn();
     $("#mute-btn").innerHTML = muted ? ("&#128263; " + T("SESSİZ")) : ("&#128266; " + T("SES"));
     $("#restart-btn").innerHTML = "&#8635; " + T("↺ BAŞA").replace("↺ ", "");
     langBtn.innerHTML = I18N.lang === "tr" ? "&#127760; EN" : "&#127760; TR";
@@ -1695,6 +1707,7 @@
     I18N.lang = I18N.lang === "tr" ? "en" : "tr";
     save.lang = I18N.lang; persist(); sfx.select();
     applyStaticLabels();
+    if (typeof applyWarningLabels === "function") applyWarningLabels();
     go(state.node || "start"); // mevcut düğümü yeni dilde yeniden çiz
   };
   applyStaticLabels();
@@ -1716,9 +1729,36 @@
     if (Math.random() < 0.14 && actx && !muted) { Math.random() < 0.5 ? sfx.heart() : sfx.whisper(); }
   }, 8500);
 
+  /* ---------- giriş / içerik uyarı ekranı ---------- */
+  const WARN_BODY_TR = "Bu bir <strong>korku deneyimidir</strong>. Ani sesler, aniden beliren görüntüler (jump-scare) ve yanıp sönen ışıklar içerir. Kulaklık önerilir. Işık hassasiyetiniz (fotosensitif epilepsi) varsa lütfen dikkatli olun — efektleri “⚡ EFEKT” düğmesinden azaltabilirsiniz.";
+  function applyWarningLabels() {
+    const set = (id, key) => { const el = $("#" + id); if (el) el.innerHTML = T(key); };
+    set("warn-title", "⚠ UYARI");
+    set("warn-body", WARN_BODY_TR);
+    set("warn-start", "▶ GİR");
+    set("warn-safe", "⚡ EFEKTLERİ AZALT & GİR");
+    set("warn-foot", "Ses için tıklaman gerekir · Kulaklık önerilir 🎧");
+  }
+  const warning = $("#warning");
+  function enterGame(safe) {
+    if (safe) { reduceFx = true; save.reduceFx = true; persist(); applyReduceFx(); updateSafeBtn(); }
+    audioInit();
+    warning.classList.add("hide");
+    setTimeout(() => { warning.style.display = "none"; }, 700);
+  }
+  $("#warn-start").onclick = () => { sfx && sfx.confirm && sfx.confirm(); enterGame(false); };
+  $("#warn-safe").onclick = () => { enterGame(true); };
+  // uyarı ekranında Enter/Space ile gir
+  document.addEventListener("keydown", (e) => {
+    if (warning.style.display === "none" || warning.classList.contains("hide")) return;
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enterGame(false); }
+  });
+  applyWarningLabels();
+
   /* ---------- boot ---------- */
   setTimeout(() => crt.classList.remove("booting"), 1700);
   drawStatic();
   go("start");
+  // yedek: uyarı ekranı atlanırsa ilk tıklamada ses başlasın
   document.addEventListener("click", audioInit, { once: true });
 })();

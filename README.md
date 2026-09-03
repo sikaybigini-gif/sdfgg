@@ -3,7 +3,9 @@
 Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmacalı** ve dallanan hikayeli bir *analog korku* (analog horror) oyunu. Tavan arasında etiketsiz bir kaset bulursun. Oynatırsın. Kayıttan sağ çıkmaya — ve içine hapsolmuş sekiz izleyeni kurtarmaya — çalışırsın.
 
 ## Özellikler
-- 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca ve başarım metinleri çevrili, seçim `localStorage`'a kaydedilir
+- ⚠️ **İçerik / fotosensitivite uyarı ekranı** — girişte net uyarı; “normal gir” veya “efektleri azaltarak gir” seçeneği
+- ♿ **Erişilebilirlik** — “⚡ EFEKT” düğmesiyle yanıp sönen/glitch/jumpscare efektlerini kısan güvenli mod (kalıcı), `prefers-reduced-motion` desteği, klavye odak halkaları, `aria-live` canlı bölgeler
+- 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca, başarım ve uyarı metinleri çevrili, seçim `localStorage`'a kaydedilir
 - 🏆 **Başarım sistemi** — 14 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
 - 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
 - 📞 **Gizli telefon ara sahnesi** ve 🧠 **hafıza (Simon) bulmacası** (3x3 TV ızgarası)
@@ -21,8 +23,9 @@ Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmaca
 - ❤️ **Akıl sağlığı sistemi** — 4 kademe; düştükçe ekran kırmızı nabız atar
 - 🔊 **Prosedürel ses tasarımı** — iki katmanlı uğultu, kalp atışı, fısıltı, geri sarma ve jumpscare sesleri (Web Audio)
 - 🎚️ **Gelişmiş VHS/CRT efektleri** — CRT açılış animasyonu, tarama çizgileri, RGB kayması, tracking bozulması, glitch
-- 📱 **Mobil dokunmatik desteği** — responsive düzen, dokunma optimizasyonları
-- ⌨️ **Klavye** — seçenekler `1`–`9`, çanta `B`, kapat `Esc`
+- 📱 **Mobil dokunmatik desteği** — responsive düzen, dokunma optimizasyonları, `viewport-fit=cover` çentik desteği
+- 🔗 **SEO / paylaşım** — Open Graph & Twitter kart etiketleri, SVG favicon, tema rengi
+- ⌨️ **Klavye** — seçenekler `1`–`9`, çanta `B`, kapat `Esc`, uyarı ekranında `Enter`/`Space`
 
 ## Çevrimiçi oyna
 GitHub Pages üzerinden yayında (yayına alındıktan birkaç dakika sonra):

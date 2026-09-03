@@ -2,8 +2,19 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YAYIN 08 — Analog Korku</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>YAYIN 08 — Analog Korku Oyunu</title>
+<meta name="description" content="YAYIN 08 — tarayıcıda çalışan, VHS/CRT estetikli, seslendirmeli ve bulmacalı bir analog korku oyunu. Etiketsiz bir kaset buldun. Oynat. Kayıttan sağ çık." />
+<meta name="theme-color" content="#050705" />
+<meta name="color-scheme" content="dark" />
+<meta name="author" content="YAYIN 08" />
+<!-- Open Graph / sosyal paylaşım -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="YAYIN 08 — Analog Korku Oyunu" />
+<meta property="og:description" content="Etiketsiz bir VHS kaseti buldun. Oynat. Kayıttan sağ çık. 8 bulmaca, dallanan hikaye, 13 son. TR/EN." />
+<meta property="og:image" content="images/bg_attic.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050705'/%3E%3Crect x='8' y='16' width='48' height='34' rx='4' fill='none' stroke='%238bff9e' stroke-width='3'/%3E%3Ccircle cx='24' cy='33' r='6' fill='none' stroke='%238bff9e' stroke-width='2.5'/%3E%3Ccircle cx='40' cy='33' r='6' fill='none' stroke='%238bff9e' stroke-width='2.5'/%3E%3Ctext x='32' y='60' font-family='monospace' font-size='11' fill='%23ffb642' text-anchor='middle'%3E08%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&display=swap" rel="stylesheet" />
@@ -32,23 +43,24 @@
     <div class="osd-date" id="osd-date">-- --- ----</div>
 
     <!-- kontroller -->
-    <div class="controls">
-      <button class="ctrl-btn" id="bag-btn">&#127890; ÇANTA</button>
-      <button class="ctrl-btn" id="vo-btn">&#127908; SESLENDİRME</button>
-      <button class="ctrl-btn" id="music-btn">&#127925; MÜZİK</button>
-      <button class="ctrl-btn" id="mute-btn">&#128266; SES</button>
-      <button class="ctrl-btn" id="lang-btn">&#127760; EN</button>
-      <button class="ctrl-btn" id="restart-btn">&#8635; BAŞA</button>
+    <div class="controls" role="toolbar" aria-label="Oyun kontrolleri">
+      <button type="button" class="ctrl-btn" id="bag-btn" title="Çanta (B)">&#127890; ÇANTA</button>
+      <button type="button" class="ctrl-btn" id="vo-btn" title="Seslendirme aç/kapa">&#127908; SESLENDİRME</button>
+      <button type="button" class="ctrl-btn" id="music-btn" title="Müzik aç/kapa">&#127925; MÜZİK</button>
+      <button type="button" class="ctrl-btn" id="mute-btn" title="Sesi aç/kapa">&#128266; SES</button>
+      <button type="button" class="ctrl-btn" id="safe-btn" title="Efektleri azalt (fotosensitivite)">&#9889; EFEKT</button>
+      <button type="button" class="ctrl-btn" id="lang-btn" title="Dil / Language">&#127760; EN</button>
+      <button type="button" class="ctrl-btn" id="restart-btn" title="Baştan başla">&#8635; BAŞA</button>
     </div>
 
     <!-- seslendirme çalar -->
     <audio id="vo-audio"></audio>
 
     <!-- oyun ekranı -->
-    <main id="screen"></main>
+    <main id="screen" aria-live="polite"></main>
 
     <!-- altyazı -->
-    <div id="subtitle-bar"></div>
+    <div id="subtitle-bar" aria-live="polite"></div>
 
     <!-- envanter / birleştirme modalı -->
     <div id="bag-modal" class="bag-modal">
@@ -66,6 +78,24 @@
 
     <!-- jumpscare -->
     <div id="scare"></div>
+
+    <!-- giriş / içerik uyarısı -->
+    <div id="warning" class="warning-screen">
+      <div class="warning-box">
+        <div class="warning-title" id="warn-title">⚠ UYARI</div>
+        <p class="warning-text" id="warn-body">
+          Bu bir <strong>korku deneyimidir</strong>. Ani sesler, aniden beliren görüntüler
+          (jump-scare) ve yanıp sönen ışıklar içerir. Kulaklık önerilir.
+          Işık hassasiyetiniz (fotosensitif epilepsi) varsa lütfen dikkatli olun —
+          efektleri “⚡ EFEKT” düğmesinden azaltabilirsiniz.
+        </p>
+        <div class="warning-actions">
+          <button type="button" class="warn-btn" id="warn-start">▶ GİR</button>
+          <button type="button" class="warn-btn ghost" id="warn-safe">⚡ EFEKTLERİ AZALT & GİR</button>
+        </div>
+        <div class="warning-foot" id="warn-foot">Ses için tıklaman gerekir · Kulaklık önerilir 🎧</div>
+      </div>
+    </div>
   </div>
 
   <script src="i18n.js"></script>

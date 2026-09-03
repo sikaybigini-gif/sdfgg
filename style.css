@@ -541,3 +541,65 @@ h1.title{
   #screen{padding:9vh 5vw;}
   .hud{font-size:14px;}
 }
+
+/* =====================================================================
+   v10 — KALİTE CİLASI
+   Giriş uyarı ekranı, erişilebilirlik, "efektleri azalt" modu, bloom
+   ===================================================================== */
+
+/* ---- giriş / içerik uyarı ekranı ---- */
+.warning-screen{
+  position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,#0a120c 0%,#020402 80%);
+  padding:24px;text-align:center;animation:warnIn .5s ease-out;
+}
+.warning-screen.hide{opacity:0;pointer-events:none;transition:opacity .6s;}
+@keyframes warnIn{from{opacity:0;}to{opacity:1;}}
+.warning-box{max-width:620px;border:1px solid var(--dim);background:rgba(3,7,4,.7);
+  padding:34px 30px;box-shadow:0 0 60px rgba(0,0,0,.8),inset 0 0 40px rgba(0,0,0,.5);}
+.warning-title{font-size:clamp(30px,7vw,48px);color:var(--red);letter-spacing:3px;
+  text-shadow:2px 0 #000,-2px 0 #2de1ff,0 0 26px rgba(255,45,45,.6);margin-bottom:14px;}
+.warning-text{font-family:'Special Elite',monospace;font-size:clamp(15px,3.4vw,19px);
+  line-height:1.6;color:#c7e0cc;margin:0 auto 26px;max-width:52ch;}
+.warning-text strong{color:var(--amber);}
+.warning-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.warn-btn{font-family:'VT323',monospace;font-size:clamp(19px,4.5vw,24px);letter-spacing:1px;
+  color:#04120a;background:var(--green);border:2px solid var(--green);padding:12px 26px;cursor:pointer;
+  transition:transform .1s,box-shadow .15s;-webkit-tap-highlight-color:transparent;}
+.warn-btn:hover{box-shadow:0 0 24px rgba(139,255,158,.6);transform:translateY(-2px);}
+.warn-btn.ghost{background:transparent;color:var(--amber);border-color:var(--amber);}
+.warn-btn.ghost:hover{box-shadow:0 0 24px rgba(255,182,66,.45);}
+.warning-foot{margin-top:22px;font-size:16px;color:#7a9a80;letter-spacing:1px;}
+
+/* ---- ekran bloom / cam parlaması (kalite hissi) ---- */
+#crt::after{
+  content:"";position:absolute;inset:0;z-index:9;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,rgba(139,255,158,.05),transparent 55%);
+  mix-blend-mode:screen;
+}
+
+/* ---- erişilebilirlik: klavye odak halkası ---- */
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+.choice:focus-visible{outline:2px solid var(--amber);outline-offset:-2px;background:rgba(255,182,66,.12);}
+
+/* ---- "efektleri azalt" (safe) modu ---- */
+.safe .rgbshift,
+.safe #bg::after{display:none;}
+.safe .scanlines{opacity:.35;}
+.safe .tracking.show{animation:none;opacity:0;}
+.safe #crt.glitch{animation:none;}
+.safe #scare.fire{animation:none;}
+.safe #scare .glyph{text-shadow:0 0 20px var(--red);}
+.safe #crt{filter:contrast(1.05) brightness(1.02);}
+.safe #crt::after{display:none;}
+#crt.safe.booting{animation:none;}
+
+/* ---- prefers-reduced-motion: hareketi kısıtla ---- */
+@media (prefers-reduced-motion:reduce){
+  .rgbshift{display:none;}
+  .scanlines{animation:none;}
+  #crt.booting{animation:crtOnSoft .6s ease-out;}
+  .frame{animation:none;}
+  h1.title{animation:none;}
+}
+@keyframes crtOnSoft{from{opacity:0;}to{opacity:1;}}
