@@ -603,3 +603,42 @@ h1.title{
   h1.title{animation:none;}
 }
 @keyframes crtOnSoft{from{opacity:0;}to{opacity:1;}}
+
+/* =====================================================================
+   v11 — GİZLİ KOLEKSİYON: KAYIP FRAGMANLAR + SÜRE
+   ===================================================================== */
+
+/* odada saklı tıklanabilir iz (hafif belli olur, yanıp söner) */
+.frag-spot{
+  position:absolute;z-index:14;width:26px;height:26px;padding:0;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,182,66,.55),rgba(255,182,66,.06) 70%,transparent);
+  border:1px solid rgba(255,182,66,.35);cursor:pointer;
+  animation:fragPulse 2.4s ease-in-out infinite;-webkit-tap-highlight-color:transparent;
+}
+.frag-spot:hover{background:radial-gradient(circle,rgba(255,182,66,.85),rgba(255,182,66,.12) 70%,transparent);
+  box-shadow:0 0 18px rgba(255,182,66,.6);}
+@keyframes fragPulse{0%,100%{opacity:.25;transform:scale(.85);}50%{opacity:.7;transform:scale(1.05);}}
+.safe .frag-spot{animation:none;opacity:.45;}
+
+/* fragman okuma modalı */
+.frag-modal{
+  position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  background:rgba(2,4,2,.82);padding:24px;
+}
+.frag-modal.show{animation:fadeIn .25s;}
+.frag-panel{
+  max-width:520px;border:1px solid var(--amber);background:rgba(6,12,7,.95);
+  padding:26px 24px;box-shadow:0 0 50px rgba(0,0,0,.8),inset 0 0 30px rgba(0,0,0,.5);text-align:center;
+}
+.frag-title{font-size:clamp(20px,5vw,28px);color:var(--amber);letter-spacing:2px;margin-bottom:14px;
+  text-shadow:0 0 12px rgba(255,182,66,.4);}
+.frag-text{font-family:'Special Elite',monospace;font-size:clamp(15px,3.4vw,19px);line-height:1.6;
+  color:#d8ecdc;margin:0 auto 22px;max-width:46ch;font-style:italic;}
+.frag-close{margin:0 auto;}
+
+/* galeri: fragman rozetleri */
+.frag-badge{font-size:14px;border:1px solid var(--dim);padding:3px 9px;color:#4d7a56;
+  background:rgba(6,16,9,.5);letter-spacing:.5px;}
+.frag-badge.got{color:var(--amber);border-color:var(--amber);cursor:pointer;
+  text-shadow:0 0 6px rgba(255,182,66,.3);}
+.frag-badge.got:hover{background:rgba(255,182,66,.12);}

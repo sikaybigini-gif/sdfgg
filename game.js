@@ -52,7 +52,32 @@
     decoder: { name: "Şifre Kırıcı", desc: "Günlüğün şifresini çözdün." },
     puzzle8: { name: "Bilmececi", desc: "8 bulmaca çözdün." },
     pacifist: { name: "Zarar Görmeden", desc: "Hiç can kaybetmeden kaçtın." },
+    first_frag: { name: "Meraklı Göz", desc: "İlk kayıp fragmanı buldun." },
+    archivist8: { name: "Sekiz İsim", desc: "Sekiz kayıp fragmanın hepsini topladın." },
+    speedrun: { name: "Hızlı Kaçış", desc: "8 dakikadan kısa sürede kaçtın." },
   };
+
+  /* Gizli koleksiyon: kayıp izleyenlerin fragmanları.
+     Ana odalarda saklı; bulununca kalıcı olarak açılır ve galeride okunur. */
+  const FRAGMENTS = {
+    f_attic:   { name: "Fragman I — Tavan Arası", room: "start",
+      text: "“Kaseti ben de tavan arasında buldum. Sadece bir kez izleyeceğimi sandım. Adım artık duvarda. — E.”" },
+    f_hallway: { name: "Fragman II — Koridor", room: "tape1",
+      text: "“Koridorun sonundaki kapı hiç kapanmadı. O nefes benim değildi ama artık benimle nefes alıyor. — M.”" },
+    f_stairs:  { name: "Fragman III — Merdiven", room: "stairs",
+      text: "“Yüzü olmayan kadın annemdi. Beni işaret etti, ben de indim. Keşke inmeseydim. — S.”" },
+    f_basement:{ name: "Fragman IV — Bodrum", room: "basement_enter",
+      text: "“Çentikleri saydım: yedi. Sekizinciyi kazırken elim titriyordu. Sekizinci bendim. — A.”" },
+    f_ritual:  { name: "Fragman V — Ritüel Odası", room: "ritual_room",
+      text: "“Mühür bizi içeride tutmuyor; dışarıyı dışarıda tutuyor. Onu kırma. Yalvarırım. — K.”" },
+    f_dark:    { name: "Fragman VI — Karanlık", room: "dark_room",
+      text: "“Işığı kapattıklarında sekizimiz de aynı anda güldük. Neden güldüğümü hâlâ bilmiyorum. — D.”" },
+    f_mirror:  { name: "Fragman VII — Ayna", room: "mirror_room",
+      text: "“Aynadaki bana el salladım. O el sallamadı. Sonra yer değiştirdik. Şimdi ben camdayım. — N.”" },
+    f_door:    { name: "Fragman VIII — Ön Kapı", room: "front_door",
+      text: "“Kapıya en çok yaklaşan bendim. Bir adım kalmıştı. Geriye baktım. Sakın bakma. — T.”" },
+  };
+
   let save = loadSave();
 
   /* ---------- efektleri azalt (fotosensitivite / erişilebilirlik) ---------- */
@@ -66,8 +91,8 @@
   const T = (s) => I18N.t(s);
 
   function loadSave() {
-    const def = { endings: {}, achievements: {}, voOn: true, musicOn: true, difficulty: "normal", lang: "tr", reduceFx: false,
-      stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, checkpoint: null };
+    const def = { endings: {}, achievements: {}, fragments: {}, voOn: true, musicOn: true, difficulty: "normal", lang: "tr", reduceFx: false,
+      stats: { deaths: 0, wins: 0, plays: 0, puzzles: 0 }, bestTime: null, checkpoint: null };
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY));
       if (!s) return def;
@@ -75,6 +100,7 @@
         stats: Object.assign(def.stats, s.stats || {}),
         achievements: s.achievements || {},
         endings: s.endings || {},
+        fragments: s.fragments || {},
       });
     } catch { return def; }
   }
@@ -93,6 +119,27 @@
     if (!ACHIEVEMENTS[id] || save.achievements[id]) return;
     save.achievements[id] = true; persist();
     toast(ACHIEVEMENTS[id]);
+  }
+  /* ---------- gizli koleksiyon: kayıp fragmanlar ---------- */
+  function collectFragment(id) {
+    if (!FRAGMENTS[id] || save.fragments[id]) return;
+    save.fragments[id] = true; persist();
+    unlockAch("first_frag");
+    if (Object.keys(FRAGMENTS).every((k) => save.fragments[k])) unlockAch("archivist8");
+    toast({ name: T("KAYIP FRAGMAN"), desc: T(FRAGMENTS[id].name) });
+    sfx.pickup(); tone(660, 0.25, "triangle", 0.08);
+  }
+  /* ---------- süre / speedrun ---------- */
+  let runStart = 0;
+  function fmtTime(ms) {
+    const s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+    return m + ":" + String(s % 60).padStart(2, "0");
+  }
+  function recordRunTime() {
+    if (!runStart) return;
+    const elapsed = Date.now() - runStart;
+    if (save.bestTime == null || elapsed < save.bestTime) { save.bestTime = elapsed; persist(); }
+    if (elapsed <= 8 * 60 * 1000) unlockAch("speedrun");
   }
   // zorluk: normal 4 can, kâbus 2 can + daha hızlı yazı
   const DIFF = { normal: { sanity: 4, label: "NORMAL" }, nightmare: { sanity: 2, label: "KÂBUS" } };
@@ -531,9 +578,57 @@
           render(node); // galeriyi yeniden çiz
         };
       });
+      // galeride: fragman rozetlerine tıklayınca metni okunur
+      screen.querySelectorAll(".frag-badge.got").forEach((b) => {
+        b.onclick = () => { sfx.select(); showFragment(b.dataset.frag); };
+      });
     }
+    // gizli fragman: bu odada saklı bir iz varsa ve henüz bulunmadıysa yerleştir
+    mountFragment(state.node);
     if (node.onEnter) node.onEnter();
     renderHUD();
+  }
+
+  /* gizli fragman izini ekrana yerleştir (odaya özel, tekrar oynanır) */
+  const FRAG_SPOTS = {
+    start: { x: 12, y: 74 }, tape1: { x: 88, y: 30 }, stairs: { x: 8, y: 44 },
+    basement_enter: { x: 91, y: 58 }, ritual_room: { x: 6, y: 30 },
+    dark_room: { x: 94, y: 80 }, mirror_room: { x: 10, y: 22 }, front_door: { x: 90, y: 68 },
+  };
+  function mountFragment(nodeId) {
+    const fragId = Object.keys(FRAGMENTS).find((k) => FRAGMENTS[k].room === nodeId);
+    if (!fragId || save.fragments[fragId]) return;
+    const spot = FRAG_SPOTS[nodeId]; if (!spot) return;
+    const dot = document.createElement("button");
+    dot.className = "frag-spot"; dot.setAttribute("aria-label", T("gizli iz"));
+    dot.style.left = spot.x + "%"; dot.style.top = spot.y + "%";
+    dot.onclick = (e) => {
+      e.stopPropagation();
+      collectFragment(fragId);
+      showFragment(fragId);
+      dot.remove();
+    };
+    crt.appendChild(dot);
+    // düğüm değişince temizlensin
+    dot.dataset.frag = fragId;
+  }
+  function clearFragmentSpots() {
+    document.querySelectorAll(".frag-spot").forEach((d) => d.remove());
+  }
+  /* fragman metnini modal olarak göster */
+  function showFragment(fragId) {
+    const f = FRAGMENTS[fragId]; if (!f) return;
+    const ov = document.createElement("div");
+    ov.className = "frag-modal show";
+    ov.innerHTML = `<div class="frag-panel">
+      <div class="frag-title">${T(f.name)}</div>
+      <p class="frag-text">${T(f.text)}</p>
+      <button class="puzzle-btn frag-close">${T("KAPAT")}</button>
+    </div>`;
+    ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+    ov.querySelector(".frag-close").onclick = () => { sfx.select(); ov.remove(); };
+    crt.appendChild(ov);
+    sfx.whisper();
   }
 
   function galleryHTML() {
@@ -543,7 +638,9 @@
       `<span class="badge ${save.endings[k] ? "got" : ""}">${save.endings[k] ? T(ENDINGS[k]) : T("??? — kilitli")}</span>`
     ).join("");
     const st = save.stats || {};
-    const stats = `<div class="stats-line">${T(`▸ Oynanış: ${st.plays || 0} · Kaçış: ${st.wins || 0} · Ölüm: ${st.deaths || 0} · Çözülen bulmaca: ${st.puzzles || 0}`)}</div>`;
+    const best = save.bestTime != null ? fmtTime(save.bestTime) : "—";
+    const stats = `<div class="stats-line">${T(`▸ Oynanış: ${st.plays || 0} · Kaçış: ${st.wins || 0} · Ölüm: ${st.deaths || 0} · Çözülen bulmaca: ${st.puzzles || 0}`)}</div>` +
+      `<div class="stats-line">${T("⏱ En hızlı kaçış")}: ${best}</div>`;
     // zorluk seçici
     const d = save.difficulty || "normal";
     const diff = `<div class="diff-row">
@@ -557,7 +654,16 @@
       `<span class="ach-badge ${save.achievements[k] ? "got" : ""}" title="${T(ACHIEVEMENTS[k].desc)}">${save.achievements[k] ? "🏆 " + T(ACHIEVEMENTS[k].name) : "🔒 ???"}</span>`
     ).join("");
     const ach = `<div class="ach-wrap"><div class="ach-line">${T(`BAŞARIMLAR: ${aGot} / ${aKeys.length}`)}</div><div class="ach-grid">${aBadges}</div></div>`;
-    return `<div class="progress-line">${T(`KEŞFEDİLEN SONLAR: ${got} / ${keys.length}`)}</div><div class="gallery">${badges}</div>${stats}${diff}${ach}`;
+    // kayıp fragmanlar koleksiyonu
+    const fKeys = Object.keys(FRAGMENTS);
+    const fGot = fKeys.filter((k) => save.fragments[k]).length;
+    const fBadges = fKeys.map((k) =>
+      save.fragments[k]
+        ? `<span class="frag-badge got" data-frag="${k}" title="${T("Oku")}">📄 ${T(FRAGMENTS[k].name)}</span>`
+        : `<span class="frag-badge">🔒 ???</span>`
+    ).join("");
+    const frag = `<div class="ach-wrap"><div class="ach-line">${T(`KAYIP FRAGMANLAR: ${fGot} / ${fKeys.length}`)}</div><div class="ach-grid">${fBadges}</div></div>`;
+    return `<div class="progress-line">${T(`KEŞFEDİLEN SONLAR: ${got} / ${keys.length}`)}</div><div class="gallery">${badges}</div>${stats}${diff}${ach}${frag}`;
   }
 
   // hangi düğümde müzik ne kadar gergin olsun
@@ -600,6 +706,7 @@
     osdCh.innerHTML = `CH 08 &bull; ${node.osd || "PLAY &#9658;"}`;
     stopVO();
     stopScan();
+    clearFragmentSpots();
     if (node.vo || node.sub) playVO(node.vo, node.sub, node.entity);
     render(node);
   }
@@ -613,6 +720,7 @@
       bumpStat("wins"); unlockAch("survivor");
       if (save.difficulty === "nightmare") unlockAch("nightmare");
       if (state.flawless) unlockAch("pacifist");
+      recordRunTime();
     } else bumpStat("deaths");
     if (id === "free_all") unlockAch("liberator");
     if (id === "mirror_true") unlockAch("mirror");
@@ -970,8 +1078,8 @@
       prompt: "Kaseti oynatmak istiyor musun?",
       onEnter: () => { updateResumeBtn(); },
       choices: [
-        { text: "OYNAT ▶ (yeni oyun)", to: "tape1", action: () => { audioInit(); bumpStat("plays"); unlockAch("first_play"); } },
-        { text: () => `KALDIĞIN YERDEN DEVAM ET ▸ (${save.checkpoint ? CHAPTER_NAME[save.checkpoint.node] || "bölüm" : ""})`, action: () => { audioInit(); resumeCheckpoint(); }, if: () => !!save.checkpoint },
+        { text: "OYNAT ▶ (yeni oyun)", to: "tape1", action: () => { audioInit(); bumpStat("plays"); unlockAch("first_play"); runStart = Date.now(); } },
+        { text: () => `KALDIĞIN YERDEN DEVAM ET ▸ (${save.checkpoint ? CHAPTER_NAME[save.checkpoint.node] || "bölüm" : ""})`, action: () => { audioInit(); resumeCheckpoint(); if (!runStart) runStart = Date.now(); }, if: () => !!save.checkpoint },
         { text: "Kaseti geri koy, odadan çık", to: "coward" },
       ],
       hint: "SES/SESLENDİRME İÇİN TIKLA · KULAKLIK ÖNERİLİR · 1-9 TUŞLARIYLA SEÇ",

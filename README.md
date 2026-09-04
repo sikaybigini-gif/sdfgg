@@ -6,7 +6,9 @@ Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmaca
 - ⚠️ **İçerik / fotosensitivite uyarı ekranı** — girişte net uyarı; “normal gir” veya “efektleri azaltarak gir” seçeneği
 - ♿ **Erişilebilirlik** — “⚡ EFEKT” düğmesiyle yanıp sönen/glitch/jumpscare efektlerini kısan güvenli mod (kalıcı), `prefers-reduced-motion` desteği, klavye odak halkaları, `aria-live` canlı bölgeler
 - 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca, başarım ve uyarı metinleri çevrili, seçim `localStorage`'a kaydedilir
-- 🏆 **Başarım sistemi** — 14 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 🏆 **Başarım sistemi** — 17 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 🔎 **Gizli koleksiyon: Kayıp Fragmanlar** — odalara saklanmış 8 titrek iz; tıklayınca senden önce buraya düşen izleyenlerin notları açığa çıkar ve galeride kalıcı okunur (hepsini topla → "Sekiz İsim" başarımı)
+- ⏱️ **Speedrun / süre takibi** — her kaçış süren ölçülür, en hızlı süren galeride tutulur; 8 dakikanın altında kaç → "Hızlı Kaçış" başarımı
 - 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
 - 📞 **Gizli telefon ara sahnesi** ve 🧠 **hafıza (Simon) bulmacası** (3x3 TV ızgarası)
 - 🔦 **Fener tarama mekaniği** — zifiri karanlık odada fareyle/dokunuşla ışık gezdirip gizli çıkışı ve ipuçlarını bulma

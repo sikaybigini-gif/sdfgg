@@ -36,6 +36,32 @@
     "İki eşya seç, sonra BİRLEŞTİR'e bas.": "Pick two items, then press COMBINE.",
     "BİRLEŞTİR": "COMBINE",
     "KAPAT": "CLOSE",
+    "Oku": "Read",
+    "gizli iz": "hidden trace",
+    "KAYIP FRAGMAN": "LOST FRAGMENT",
+    "⏱ En hızlı kaçış": "⏱ Fastest escape",
+    "Meraklı Göz": "Curious Eye",
+    "İlk kayıp fragmanı buldun.": "You found the first lost fragment.",
+    "Sekiz İsim": "Eight Names",
+    "Sekiz kayıp fragmanın hepsini topladın.": "You collected all eight lost fragments.",
+    "Hızlı Kaçış": "Speedrunner",
+    "8 dakikadan kısa sürede kaçtın.": "You escaped in under 8 minutes.",
+    "Fragman I — Tavan Arası": "Fragment I — The Attic",
+    "Fragman II — Koridor": "Fragment II — The Hallway",
+    "Fragman III — Merdiven": "Fragment III — The Stairs",
+    "Fragman IV — Bodrum": "Fragment IV — The Basement",
+    "Fragman V — Ritüel Odası": "Fragment V — The Ritual Room",
+    "Fragman VI — Karanlık": "Fragment VI — The Dark",
+    "Fragman VII — Ayna": "Fragment VII — The Mirror",
+    "Fragman VIII — Ön Kapı": "Fragment VIII — The Front Door",
+    "“Kaseti ben de tavan arasında buldum. Sadece bir kez izleyeceğimi sandım. Adım artık duvarda. — E.”": "“I found the tape in the attic too. I thought I'd only watch once. My name is on the wall now. — E.”",
+    "“Koridorun sonundaki kapı hiç kapanmadı. O nefes benim değildi ama artık benimle nefes alıyor. — M.”": "“The door at the end of the hall never closed. That breathing wasn't mine, but now it breathes with me. — M.”",
+    "“Yüzü olmayan kadın annemdi. Beni işaret etti, ben de indim. Keşke inmeseydim. — S.”": "“The faceless woman was my mother. She pointed at me, and I went down. I wish I hadn't. — S.”",
+    "“Çentikleri saydım: yedi. Sekizinciyi kazırken elim titriyordu. Sekizinci bendim. — A.”": "“I counted the marks: seven. My hand shook as I carved the eighth. The eighth was me. — A.”",
+    "“Mühür bizi içeride tutmuyor; dışarıyı dışarıda tutuyor. Onu kırma. Yalvarırım. — K.”": "“The seal doesn't keep us in; it keeps the outside out. Don't break it. I beg you. — K.”",
+    "“Işığı kapattıklarında sekizimiz de aynı anda güldük. Neden güldüğümü hâlâ bilmiyorum. — D.”": "“When they cut the light, all eight of us laughed at once. I still don't know why I laughed. — D.”",
+    "“Aynadaki bana el salladım. O el sallamadı. Sonra yer değiştirdik. Şimdi ben camdayım. — N.”": "“I waved at myself in the mirror. It didn't wave back. Then we swapped. Now I'm in the glass. — N.”",
+    "“Kapıya en çok yaklaşan bendim. Bir adım kalmıştı. Geriye baktım. Sakın bakma. — T.”": "“I got closest to the door. One step left. I looked back. Never look back. — T.”",
     "Çantan boş.": "Your bag is empty.",
     "İki eşya seçmelisin.": "You must select two items.",
     "Bu ikisi birleşmiyor.": "These two don't combine.",
@@ -499,6 +525,8 @@
     if (m) return `ENDINGS DISCOVERED: ${m[1]} / ${m[2]}`;
     m = str.match(/^BAŞARIMLAR: (\d+) \/ (\d+)$/);
     if (m) return `ACHIEVEMENTS: ${m[1]} / ${m[2]}`;
+    m = str.match(/^KAYIP FRAGMANLAR: (\d+) \/ (\d+)$/);
+    if (m) return `LOST FRAGMENTS: ${m[1]} / ${m[2]}`;
     return null;
   }
 
