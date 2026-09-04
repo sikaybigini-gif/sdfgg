@@ -642,3 +642,54 @@ h1.title{
 .frag-badge.got{color:var(--amber);border-color:var(--amber);cursor:pointer;
   text-shadow:0 0 6px rgba(255,182,66,.3);}
 .frag-badge.got:hover{background:rgba(255,182,66,.12);}
+
+/* =====================================================================
+   v12 — RUH TAHTASI (OUIJA) BULMACASI
+   ===================================================================== */
+.ouija{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;}
+.ouija-disp{font-family:'Special Elite',monospace;font-size:clamp(20px,6vw,30px);
+  letter-spacing:8px;color:var(--amber);text-shadow:0 0 14px rgba(255,182,66,.5);
+  min-height:1.2em;padding:4px 10px;border-bottom:1px solid rgba(255,182,66,.3);}
+.ouija-letters{position:relative;display:flex;flex-wrap:wrap;justify-content:center;
+  gap:5px;max-width:520px;padding:14px;border:1px solid rgba(180,150,90,.35);
+  background:radial-gradient(ellipse at 50% 30%,rgba(40,30,14,.6),rgba(4,6,4,.85));
+  border-radius:10px;box-shadow:inset 0 0 40px rgba(0,0,0,.7);}
+.ouija-key{width:38px;height:40px;font-family:'Special Elite',monospace;font-size:19px;
+  color:#c9b98a;background:rgba(20,16,8,.6);border:1px solid rgba(150,125,70,.3);
+  border-radius:5px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.ouija-key:hover{color:#fff;border-color:var(--amber);background:rgba(60,44,16,.7);
+  box-shadow:0 0 12px rgba(255,182,66,.4);}
+.ouija-key.chan{color:var(--amber);border-color:var(--amber);
+  text-shadow:0 0 10px rgba(255,182,66,.7);background:rgba(70,50,18,.8);}
+.planchette{position:absolute;left:50%;top:50%;width:44px;height:44px;
+  transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;
+  font-size:34px;color:rgba(230,215,255,.9);pointer-events:none;opacity:0;
+  transition:left .55s cubic-bezier(.5,.1,.3,1),top .55s cubic-bezier(.5,.1,.3,1),opacity .3s;
+  text-shadow:0 0 20px rgba(190,150,255,.9),0 0 40px rgba(120,80,200,.6);z-index:3;
+  filter:drop-shadow(0 0 6px rgba(160,120,240,.7));}
+.planchette.show{opacity:.92;}
+.planchette.locked{animation:planchLock 1s ease-in-out infinite;color:#fff;}
+@keyframes planchLock{0%,100%{transform:translate(-50%,-50%) scale(1);}
+  50%{transform:translate(-50%,-50%) scale(1.15);}}
+.safe .planchette{transition:left .2s,top .2s,opacity .2s;text-shadow:0 0 6px rgba(190,150,255,.5);}
+
+/* =====================================================================
+   v12 — YAŞAYAN EV: kenar gölgeleri + fısıltı yazıları
+   ===================================================================== */
+.edge-shadow{position:absolute;top:0;bottom:0;width:34%;z-index:13;pointer-events:none;
+  opacity:0;mix-blend-mode:multiply;}
+.edge-shadow.left{left:0;background:linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.4) 55%,transparent);
+  animation:edgeLeft 2.6s ease-in-out forwards;}
+.edge-shadow.right{right:0;background:linear-gradient(270deg,rgba(0,0,0,.92),rgba(0,0,0,.4) 55%,transparent);
+  animation:edgeRight 2.6s ease-in-out forwards;}
+@keyframes edgeLeft{0%{opacity:0;transform:translateX(-30%);}
+  30%{opacity:.85;}70%{opacity:.85;transform:translateX(6%);}100%{opacity:0;transform:translateX(-30%);}}
+@keyframes edgeRight{0%{opacity:0;transform:translateX(30%);}
+  30%{opacity:.85;}70%{opacity:.85;transform:translateX(-6%);}100%{opacity:0;transform:translateX(30%);}}
+.whisper-text{position:absolute;z-index:15;pointer-events:none;
+  font-family:'Special Elite',monospace;font-size:clamp(15px,3.6vw,22px);
+  color:rgba(210,160,160,.8);letter-spacing:2px;white-space:nowrap;
+  text-shadow:0 0 12px rgba(160,20,20,.6);animation:whisperFade 1.8s ease-in-out forwards;}
+@keyframes whisperFade{0%{opacity:0;filter:blur(6px);}25%{opacity:.75;filter:blur(0);}
+  70%{opacity:.6;}100%{opacity:0;filter:blur(4px);}}
+.safe .edge-shadow,.safe .whisper-text{display:none;}

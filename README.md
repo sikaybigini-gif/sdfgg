@@ -6,7 +6,9 @@ Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmaca
 - ⚠️ **İçerik / fotosensitivite uyarı ekranı** — girişte net uyarı; “normal gir” veya “efektleri azaltarak gir” seçeneği
 - ♿ **Erişilebilirlik** — “⚡ EFEKT” düğmesiyle yanıp sönen/glitch/jumpscare efektlerini kısan güvenli mod (kalıcı), `prefers-reduced-motion` desteği, klavye odak halkaları, `aria-live` canlı bölgeler
 - 🌐 **İki dil desteği (TR/EN)** — Türkçe ve İngilizce arasında tek tuşla geçiş; tüm hikaye, arayüz, bulmaca, başarım ve uyarı metinleri çevrili, seçim `localStorage`'a kaydedilir
-- 🏆 **Başarım sistemi** — 17 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 🏆 **Başarım sistemi** — 18 başarım, açıldıkça ekranda şık açılır bildirim; başlangıç ekranında galeri
+- 🔮 **Ruh tahtası (Ouija) bulmacası** — plançetin kaydığı harflere dokunarak ruhların hecelediği gizli uyarıyı topla; çözersen ayna odasında güvenli bir kaçış yolu ve tebeşir kazanırsın
+- 🏚️ **"Yaşayan ev" atmosfer sistemi** — gergin sahnelerde zamanla kenardan süzülen gölgeler, ani tracking bozulmaları ve bir an beliren fısıltı yazıları (sahne yoğunluğuna göre sıklaşır; güvenli/efekt-az modunda tamamen kapalı)
 - 🔎 **Gizli koleksiyon: Kayıp Fragmanlar** — odalara saklanmış 8 titrek iz; tıklayınca senden önce buraya düşen izleyenlerin notları açığa çıkar ve galeride kalıcı okunur (hepsini topla → "Sekiz İsim" başarımı)
 - ⏱️ **Speedrun / süre takibi** — her kaçış süren ölçülür, en hızlı süren galeride tutulur; 8 dakikanın altında kaç → "Hızlı Kaçış" başarımı
 - 💀 **Zorluk modları** — Normal (4 can) ve Kâbus (2 can, daha hızlı yayın); başlangıç ekranından seçilir
@@ -15,7 +17,7 @@ Tarayıcıda çalışan, **VHS/CRT estetikli**, tam **seslendirmeli**, **bulmaca
 - 🪞 **4 bölüm** — koridor → bodrum → mühürlü ritüel odası → kaçış (karanlık + ayna odası + ön kapı)
 - 💾 **Checkpoint / kaldığın yerden devam** — bölüm başları otomatik kaydedilir, başlangıç ekranından devam edebilirsin
 - 📊 **İstatistikler** — oynanış, kaçış, ölüm ve çözülen bulmaca sayısı kalıcı olarak tutulur
-- 🧩 **8 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi, kaset kronolojisi sıralama, hafıza dizisi (Simon), **renk kablosu birleştirme (sigorta kutusu)**, **Sezar şifre çözücü halka (gizli günlük)** ve **kayan parça fotoğraf yap-bozu**
+- 🧩 **9 etkileşimli bulmaca** — şifreli asma kilit, parazitli sinyali netleştirme (canlı statik sesi), sembol dizisi, kaset kronolojisi sıralama, hafıza dizisi (Simon), **renk kablosu birleştirme (sigorta kutusu)**, **Sezar şifre çözücü halka (gizli günlük)**, **kayan parça fotoğraf yap-bozu** ve **ruh tahtası (Ouija) harf-heceleme**
 - 🎒 **Envanter + eşya birleştirme** — parçaları çantada birleştir (bozuk fener + pil → çalışır fener; fotoğrafın iki yarısı → tam fotoğraf)
 - 🎵 **Prosedürel ambient korku müziği** — sürekli evrilen, sahneye göre yoğunlaşan atmosfer (pad + detone notalar + derin darbeler + yankı)
 - 🎤 **Tam Türkçe seslendirme** — anlatıcı + kasetten "kendi sesinle" konuşan varlık, senkronize altyazılarla

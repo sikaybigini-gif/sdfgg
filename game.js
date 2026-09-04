@@ -55,6 +55,7 @@
     first_frag: { name: "Meraklı Göz", desc: "İlk kayıp fragmanı buldun." },
     archivist8: { name: "Sekiz İsim", desc: "Sekiz kayıp fragmanın hepsini topladın." },
     speedrun: { name: "Hızlı Kaçış", desc: "8 dakikadan kısa sürede kaçtın." },
+    medium: { name: "Aracı", desc: "Ruh tahtasıyla ölülerle konuştun." },
   };
 
   /* Gizli koleksiyon: kayıp izleyenlerin fragmanları.
@@ -615,6 +616,48 @@
   function clearFragmentSpots() {
     document.querySelectorAll(".frag-spot").forEach((d) => d.remove());
   }
+
+  /* =====================================================================
+     YAŞAYAN EV — atmosferik rastgele tacizler (kenar gölgesi + fısıltı)
+     Sahnenin gerginliğine (INTENSITY) göre sıklaşır. Güvenli modda kapalı.
+     ===================================================================== */
+  let hauntTimer = null;
+  function clearHaunt() { if (hauntTimer) { clearTimeout(hauntTimer); hauntTimer = null; } }
+  function scheduleHaunt(intensity) {
+    clearHaunt();
+    if (reduceFx || intensity <= 0.4) return; // sakin/güvenli sahnelerde rahatsız etme
+    const base = 14000 - intensity * 9000; // yoğunlukta ~5sn, düşükte ~14sn
+    const delay = base + Math.random() * 6000;
+    hauntTimer = setTimeout(() => { doHaunt(intensity); scheduleHaunt(intensity); }, delay);
+  }
+  function doHaunt(intensity) {
+    if (reduceFx) return;
+    const roll = Math.random();
+    if (roll < 0.55) {
+      // kenardan süzülen gölge
+      const sh = document.createElement("div");
+      sh.className = "edge-shadow " + (Math.random() < 0.5 ? "left" : "right");
+      crt.appendChild(sh);
+      sfx.whisper();
+      setTimeout(() => sh.remove(), 2600);
+    } else if (roll < 0.85) {
+      // ani tracking bozulması + fısıltı
+      trackingGlitch(); sfx.whisper();
+    } else if (intensity >= 0.8) {
+      // yüksek gerginlikte: ekranda bir an beliren fısıltı yazısı
+      const WHISPERS = ["arkana bakma", "sekiz", "hâlâ buradayız", "kaseti geri sar", "sen de bizimlesin"];
+      const w = document.createElement("div");
+      w.className = "whisper-text";
+      w.textContent = T(WHISPERS[Math.floor(Math.random() * WHISPERS.length)]);
+      w.style.left = (15 + Math.random() * 55) + "%";
+      w.style.top = (25 + Math.random() * 45) + "%";
+      crt.appendChild(w); sfx.whisper();
+      setTimeout(() => w.remove(), 1800);
+    }
+  }
+  function clearHauntFx() {
+    document.querySelectorAll(".edge-shadow,.whisper-text").forEach((d) => d.remove());
+  }
   /* fragman metnini modal olarak göster */
   function showFragment(fragId) {
     const f = FRAGMENTS[fragId]; if (!f) return;
@@ -671,6 +714,7 @@
     start: 0, coward: 0.3,
     tape1: 0.2, rewind1: 0.5, look_dark: 0.5, cant_stop: 0.7, stairs: 0.55,
     basement_enter: 0.6, answer_tape: 0.7, count_marks: 0.65, find_exit: 0.7,
+    seance: 0.8, seance_done: 0.6, mirror_blind: 0.7,
     tune_tape: 0.6, second_tape: 0.75, ritual_room: 0.85, symbol_wall: 0.8,
     seal_open: 0.85, tape_order: 0.85, door_lock: 0.6, mem_wall: 0.9, phone: 0.55,
     fuse_box: 0.8, diary: 0.55, diary_done: 0.5, photo_slide: 0.85,
@@ -707,6 +751,8 @@
     stopVO();
     stopScan();
     clearFragmentSpots();
+    clearHauntFx();
+    scheduleHaunt(id in INTENSITY ? INTENSITY[id] : 0);
     if (node.vo || node.sub) playVO(node.vo, node.sub, node.entity);
     render(node);
   }
@@ -1064,6 +1110,55 @@
     };
   }
 
+  /* --- 9) RUH TAHTASI (Ouija) --- */
+  function puzzleOuija({ answer, hint, onSolve }) {
+    return (wrap, msg) => {
+      const target = answer.toUpperCase();
+      const AZ = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split("");
+      const board = document.createElement("div"); board.className = "ouija";
+      const glyphs = document.createElement("div"); glyphs.className = "ouija-letters";
+      // plançet (gösterge)
+      const planchette = document.createElement("div"); planchette.className = "planchette"; planchette.textContent = "◊";
+      const disp = document.createElement("div"); disp.className = "ouija-disp"; disp.textContent = "_".repeat(target.length);
+      const letterEls = {};
+      AZ.forEach((ch) => {
+        const b = document.createElement("button");
+        b.className = "ouija-key"; b.textContent = ch; b.dataset.ch = ch;
+        glyphs.appendChild(b); letterEls[ch] = b;
+      });
+      let picked = "";
+      function moveTo(el) {
+        const gb = glyphs.getBoundingClientRect(), eb = el.getBoundingClientRect();
+        planchette.style.left = (eb.left - gb.left + eb.width / 2) + "px";
+        planchette.style.top = (eb.top - gb.top + eb.height / 2) + "px";
+        planchette.classList.add("show");
+      }
+      function pick(ch, el) {
+        moveTo(el); sfx.whisper();
+        const nextNeeded = target[picked.length];
+        if (ch === nextNeeded) {
+          picked += ch; el.classList.add("chan");
+          disp.textContent = picked + "_".repeat(target.length - picked.length);
+          tone(180 + picked.length * 40, 0.18, "sine", 0.05);
+          if (picked === target) {
+            setMsg(msg, "TAHTA CEVAP VERDİ ▸", "ok"); bumpStat("puzzles"); unlockAch("medium");
+            sfx.confirm(); tone(660, 0.4, "triangle", 0.08);
+            planchette.classList.add("locked"); setTimeout(onSolve, 1100);
+          }
+        } else {
+          setMsg(msg, "Plançet titredi ve baştan kaydı…", "err"); sfx.bad(); trackingGlitch();
+          picked = ""; disp.textContent = "_".repeat(target.length);
+          Object.values(letterEls).forEach((x) => x.classList.remove("chan"));
+        }
+      }
+      AZ.forEach((ch) => { letterEls[ch].onclick = () => pick(ch, letterEls[ch]); });
+      if (hint) { const h = document.createElement("div"); h.className = "attempts"; h.textContent = T(hint); wrap.appendChild(h); }
+      glyphs.appendChild(planchette);
+      board.append(disp, glyphs);
+      wrap.appendChild(board);
+    };
+  }
+
   /* =====================================================================
      HİKÂYE
      ===================================================================== */
@@ -1400,9 +1495,36 @@
         { text: "Feneri karanlığa tut (ışık ritüeli)", to: "light_ritual", if: () => has("fener") && (state.flags.knowsTruth || has("kaset")) },
         { text: "Mühürlü kapıyı aç", to: () => (state.flags.powerOn ? "ritual_room" : "fuse_box"), if: () => has("fener") },
         { text: "İkinci kaseti bul ve oynat", to: "tune_tape", if: () => has("kaset") && !state.flags.knowsTruth },
+        { text: "Köşedeki tozlu ruh tahtasına yaklaş", to: "seance", if: () => !state.flags.spoke },
         { text: "Gözlerini kapat, ışığa körlemesine yürü", to: "eyes_closed" },
         { text: "Kaseti bul ve kır", to: "break_tape" },
         { text: "Bağırıp yardım iste", to: "scream", danger: true, action: () => damage(1) },
+      ],
+    },
+    seance: {
+      subtitle: "BAND 2 — RUH TAHTASI", osd: "PAUSE &#10073;&#10073;", bg: "bg_basement.png",
+      sub: "Tahtanın üstünde soğuk bir plançet. Parmağın kendiliğinden kayıyor.",
+      text: "Köşede, tozun altında eski bir ruh tahtası: harfler, bir güneş, bir ay ve tek kelime — VEDA. Plançete dokunduğun an buz gibi oluyor ve parmağının altında kendiliğinden kaymaya başlıyor. Sekiz izleyen aynı anda fısıldıyor. Bırak seni yönlendirsinler; harfleri sırayla topla, sana bir uyarı heceleyecekler.",
+      onEnter: () => { sfx.heart(); sfx.whisper(); setTimeout(trackingGlitch, 900); },
+      hint: "İPUCU: Plançetin gitmek istediği harfe dokun — doğru sırayı ruhlar bilir. Yanlış harf tahtayı sıfırlar. (Aranan: 5 harf)",
+      puzzle: puzzleOuija({
+        answer: "BAKMA",
+        hint: "Harfler bir emir heceliyor. Yanlış dokunuşta plançet baştan kayar.",
+        onSolve: () => { state.flags.spoke = true; give("tebesir"); go("seance_done"); },
+      }),
+      choices: [
+        { text: "Plançeti bırak, geri çekil", to: "find_exit" },
+      ],
+    },
+    seance_done: {
+      subtitle: "BAND 2 — MESAJ ALINDI", osd: "PLAY &#9658;", bg: "bg_basement.png",
+      sub: "Plançet tek kelime bıraktı: BAKMA. Sonra durdu.",
+      text: "Plançet son harfte durdu ve tahtaya kazınmış gibi kaldı: B-A-K-M-A. Ekran bir an karla doldu, sonra sekiz ses aynı anda sustu. Ayna odasına gelirsen ne demek istediklerini anlayacaksın — yansımana asla bakma. Tahtanın altında bir tebeşir parçası buldun.",
+      onEnter: () => { sfx.whisper(); },
+      prompt: "Ruhlar seni uyardı.",
+      choices: [
+        { text: "Çıkışı aramaya devam et", to: "find_exit" },
+        { text: "Mühürlü kapıya yönel", to: () => (state.flags.powerOn ? "ritual_room" : "fuse_box"), if: () => has("fener") },
       ],
     },
 
@@ -1589,10 +1711,21 @@
       onEnter: () => { sfx.heart(); setTimeout(trackingGlitch, 800); },
       prompt: "Ne yaparsın?",
       choices: [
+        { text: "Ruhların dediğini yap: gözlerini kapat, bakmadan geç", to: "mirror_blind", if: () => state.flags.spoke },
         { text: "Aynadaki yansımana dokun", to: "mirror_touch", danger: true },
         { text: "Aynayı tebeşirle işaretle / kır", to: "mirror_break", if: () => has("tebesir") },
         { text: "Aynaya bakmadan yanından geç", to: "front_door" },
         { text: "Yansımana sırtını dön ve bekle", to: "mirror_wait", danger: true, action: () => damage(1) },
+      ],
+    },
+    mirror_blind: {
+      subtitle: "BAND 4 — GÖZLER KAPALI", osd: "PLAY &#9658;", bg: "bg_mirror.png",
+      sub: "Ruhların uyarısı doğruymuş. Bakmadın. Yansıma seni tutamadı.",
+      text: "Ruh tahtasındaki uyarıyı hatırladın: BAKMA. Gözlerini sıkıca kapatıp elini duvarda gezdirerek ilerledin. Aynadaki şey camı tırmaladı, adını fısıldadı, yalvardı — ama sen bakmadın. Bakmayınca seni tutamadı. Parmakların soğuk bir kapı koluna değdi: ön kapı.",
+      onEnter: () => { sfx.heart(); sfx.whisper(); },
+      prompt: "Yansımaya bakmadan geçtin.",
+      choices: [
+        { text: "Ön kapıya çık", to: "front_door" },
       ],
     },
 
@@ -1725,6 +1858,7 @@
   function reset() {
     state = freshState();
     tapeSecs = 0; setBg(null); stopVO(); setIntensity(0);
+    clearHaunt(); clearHauntFx();
     if (humNode) humNode.gain.gain.value = 0.035;
   }
 
@@ -1791,7 +1925,7 @@
   // efektleri azalt düğmesi
   const safeBtn = $("#safe-btn");
   function updateSafeBtn() { safeBtn.classList.toggle("off", reduceFx); safeBtn.innerHTML = "&#9889; " + T(reduceFx ? "EFEKT AZ" : "EFEKT"); }
-  safeBtn.onclick = () => { reduceFx = !reduceFx; save.reduceFx = reduceFx; persist(); applyReduceFx(); updateSafeBtn(); sfx.select(); };
+  safeBtn.onclick = () => { reduceFx = !reduceFx; save.reduceFx = reduceFx; persist(); applyReduceFx(); updateSafeBtn(); sfx.select(); if (reduceFx) { clearHaunt(); clearHauntFx(); } else { scheduleHaunt(state.node in INTENSITY ? INTENSITY[state.node] : 0); } };
   applyReduceFx(); updateSafeBtn();
   $("#restart-btn").onclick = () => { sfx.confirm(); reset(); go("start"); };
 
